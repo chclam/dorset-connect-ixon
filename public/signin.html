@@ -1,0 +1,70 @@
+<html>
+	<head>
+		<link rel="stylesheet" type="text/css" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+		<link href="https://cdnjs.cloudflare.com/ajax/libs/mdbootstrap/4.8.3/css/mdb.min.css" rel="stylesheet">
+		<link rel="stylesheet" type="text/css" href="/public/style.css">
+		<link rel="icon" type="image/png"
+ href="/public/img/favicon.png">
+		<title>Aanmelden - Dorset Connect</title>
+	</head>
+	<body class="signinbody">
+		<div class="bgsignin"></div>
+		<div class="pos-f-t wrapper">
+			<nav class="navbar fixed-top navbar-light bg-white border-bottom">
+				<a class="d-flex justify-content-between align-items-center" href="/"><img id="navbar-brand" src="/public/img/dorset-connect-horizontal.png" alt="Dorset">
+					<p class="logoText ml-2 mt-3">DORSET CONNECT</p>
+				</a>
+			</nav>
+			<div class="container mt-5 mb-5">
+				<div class="row text-center justify-content-center">
+					<div class="signInForm border rounded col-lg-5 my-5 p-4">
+						<div class="ixon">
+							<a class="d-flex justify-content-center align-items-center mb-3" href="/"><img id="navbar-brand" src="/public/img/dorset-connect-horizontal.png" alt="Dorset">
+								<p class="logoText ml-2 mt-3">DORSET CONNECT</p>
+							</a>
+							<p>Dorset Connect verbindt u met al uw Dorset Installaties.</p>
+							<button class="btn btn-primary btn-block d-flex justify-content-center align-items-center my-4" data-toggle="modal" data-target="#loginModal">
+								<img class="ixon logoWhite mr-2" src="/public/img/ixon-badge-white.png" alt="Ixon">Aanmelden met Ixon
+							</button>
+							<!-- sign in model -->
+							<div class="modal" id="loginModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+									<div class="modal-dialog modal-dialog-centered zoomIn animated fastest" role="document">
+										<div class="modal-content">
+											<div class="modal-header text-center">
+												<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+													<span aria-hidden="true">&times;</span>
+												</button>
+											</div>
+											<div class="modal-body loginModal text-center">
+												<!-- ixon sign in  -->
+												<div class="ixon col-lg-12">
+													<form method="post" name="ixon-signin" class="form" action="/signin/ixon" content-type="X-www-form-urlencoded">
+														<img class="w-50 mb-5" src="/public/img/ixon.png" alt="Ixon">
+														<p class="mb-3">Meld aan met uw account van Ixon.</p>
+														<input type="text" name="username" class="username form-control" placeholder="e-mailadres"><br>
+														<input type="password" name="password" class="password form-control" placeholder="wachtwoord"><br>
+														<button type="submit" class="signInSubmit btn btn-primary btn-block d-flex justify-content-center align-items-center">
+															<div class="spinner-border spinner-border-sm text-light mr-2" role="status">
+																<span class="sr-only">Loading...</span>
+															</div>
+															Aanmelden
+														</button>
+														<div class="devices-request-statuses" role="alert"></div>
+													</form>												
+												</div>
+											</div>
+										</div>
+									</div>
+								</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+		<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.0/jquery.min.js"></script>
+		<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+		<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mdbootstrap/4.8.3/js/mdb.min.js"></script>
+		<script type="module" src="/public/js/signin-view.js"></script>	
+	</body>
+</html>
+

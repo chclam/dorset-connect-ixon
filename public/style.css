@@ -1,0 +1,236 @@
+body { 
+    padding-top: 72px;
+    height: 100%;
+    overflow: hidden;
+}
+.wrapper {
+	position: absolute;
+	overflow: auto;
+ 	top: 72px;
+ 	left: 0;
+	right: 0;
+	bottom: 0;
+	width: 100%;
+}
+
+.bgsignin {
+	background: #fff url("img/signinbackground1.jpg") center center fixed no-repeat;
+	height: 100%;
+	transform: scale(1.1);
+  	background-size: cover;
+  	filter: blur(5px);
+  	-webkit-filter: blur(5px);
+  	-moz-filter: blur(5px);
+  	-ms-filter: blur(5px);
+  	-o-filter: blur(5px);
+  	filter: progid:DXImageTransform.Microsoft.Blur(PixelRadius='5');
+  	overflow-y: hidden;
+}
+
+.navbar {
+	height: 72px;
+}
+
+.logoText {
+	color: black;
+	font-family: "Arial";
+	font-weight: bold;
+	font-size: 110%;
+}
+
+.signInForm {
+	background-color: white;
+}
+
+#deviceSearch {
+	position: absolute;
+}
+
+.navbar-center {
+	position: absolute;
+	left: 50%;
+	transform: translate(-50%);
+}
+
+.material-icons.searchIcon {
+	margin-top: 13px;
+	z-index: 5;
+
+
+	/*disable select for various browsers*/
+	-moz-user-select: none;
+	user-select: none;
+	-ms-user-select: none;
+	-webkit-touch-callout: none;
+}
+
+.material-icons.cancelSearch {
+	margin-top: 13px;
+	z-index: 5;
+	display: none;
+}
+
+.cancelSearch:hover {
+	cursor: pointer;
+}
+
+
+.deviceStatus.online {
+	color: green;
+}
+
+.deviceLink:hover {
+	color: #4285F4;
+}
+.deviceLink:focus{
+	color: #4285F4;
+}
+
+.filters .btn-link{
+	margin-left: 25px;
+}
+
+.deviceStatus.offline {
+	color: grey;
+}
+
+.logoWhite {
+	height: 30px;
+}
+
+.logo {
+	/* height: 60px; */
+}
+
+.ewon .logo {
+	height: 45px;
+}
+
+.bullet {
+	padding: 10px;
+	font-size: 25px;
+}
+
+.bullet.online {
+	color: green;
+}
+
+.bullet.offline {
+	color: lightgrey;
+}
+
+.routerType{
+	color: grey;
+}
+
+.deviceLabel {
+	display: inline-grid;
+}
+
+.deviceLabel.subLabel {
+	display: inline;
+}
+
+.deviceProfile {
+	position: fixed;
+}
+
+.material-icons.account_circle {
+	font-size: 48px;
+}
+
+#navbar-brand {
+	width: 47px;
+	margin-left: 7px;
+}
+
+#ixon-logo {
+	width: 64px;
+}
+
+#ewon-logo {
+	width: 64px;
+}
+
+.accounts-btn:hover {
+	cursor: pointer;
+
+	/*disable select for various browsers*/
+	-moz-user-select: none;
+	user-select: none;
+	-ms-user-select: none;
+	-webkit-touch-callout: none;
+}
+
+.modal-header {
+	border-style: none;
+}
+
+.routerType {
+	text-transform: capitalize;
+}
+
+.spinner-border-sm {
+	display: none;
+}
+
+.signInForm hr {
+	z-index: 0;
+}
+
+.signInForm .of {
+	position: relative;
+	z-index: 1;
+}
+
+.signInForm .of:before {
+    border-top: 2px solid #dfdfdf;
+    content:"";
+    margin: 0 auto; /* this centers the line to the full width specified */
+    position: absolute; /* positioning must be absolute here, and relative positioning must be applied to the parent */
+    top: 50%; left: 0; right: 0; bottom: 0;
+    width: 95%;
+    z-index: -1;
+ }
+
+.signInForm .of span{ 
+    /* to hide the lines from behind the text, you have to set the background color the same as the container */ 
+    background: #fff; 
+    padding: 0 15px; 
+}
+
+.linkHeader {
+	padding-left: 20px;
+	padding-bottom: 4px;
+}
+
+/*.filters .select {
+	display: none;
+}
+*/
+
+/*Medium devices (tablets, 768px and up)*/
+@media (min-width: 768px) {
+
+}
+
+/*// Large devices (desktops, 992px and up)*/
+@media (min-width: 992px) {
+	
+}
+
+.animated.fastest {
+	animation-duration: 200ms;
+}
+
+
+.material-icons.md-18 { font-size: 18px; }
+.material-icons.md-24 { font-size: 24px; }
+.material-icons.md-36 { font-size: 36px; }
+.material-icons.md-48 { font-size: 48px; }
+
+.material-icons.md-dark { color: rgba(0, 0, 0, 0.54); }
+.material-icons.md-dark.md-inactive { color: rgba(0, 0, 0, 0.26); }
+
+.material-icons.md-light { color: rgba(255, 255, 255, 1); }
+.material-icons.md-light.md-inactive { color: rgba(255, 255, 255, 0.3); }
