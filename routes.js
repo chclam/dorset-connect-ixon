@@ -7,7 +7,10 @@ const config = require("./adapters/adapter-config");
 const ixon = require("./adapters/ixon-adapter");
 const ewon = require("./adapters/ewon-adapter");
 
-async function getAdapterSession(username, password, adapter, expiresIn){
+async function getAdapterSession(username, password, adapter, expiresIn, twoFactorAuthentication){
+    if(adapter.getAdapterName() === "ixon" && twoFactorAuthentication.length > 0){
+        return await adapter.getSession(username, password, expiresIn, twoFactorAuthentication=twoFactorAuthentication);
+    }
     return await adapter.getSession(username, password, expiresIn);
 }
 
@@ -49,12 +52,13 @@ router.post("/signin/ixon", async (req, res) => {
     const ewon = require("./adapters/ewon-adapter");
     let username = req.body.username;
     let password = req.body.password;
+    const twoFactorAuthentication = req.body.twoFactorAuthentication;
     let ixonPermissions;
     const expiresIn = 3600; // in seconds
 
     try {
         await ixon.getLinkList();
-        const ixonSession = await getAdapterSession(username, password, ixon, expiresIn);
+        const ixonSession = await getAdapterSession(username, password, ixon, expiresIn, twoFactorAuthentication);
         res = setSessionCookies(res, ixonSession, ixon.getAdapterName(), expiresIn);
         ixonPermissions = await ixon.getPermissions(ixonSession);
     }

@@ -66,7 +66,7 @@ async function getPermissions(sessionKey){
 }
 
 // expiresIn = in seconds.
-async function getSession(username, password, expiresIn) {
+async function getSession(username, password, expiresIn, twoFactorAuthentication="") {
     const requestData = {
         uri: linkDict["AccessTokenList"] + "?fields=secretId,publicId",
         method: "POST",
@@ -81,7 +81,7 @@ async function getSession(username, password, expiresIn) {
         }
     };
     // Encode authentication string.
-    let authenticationString = new Buffer.from(`${username}::${password}`);
+    let authenticationString = new Buffer.from(`${username}:${twoFactorAuthentication}:${password}`);
     authenticationString = authenticationString.toString("base64");
     requestData.headers.Authorization = `Basic ${authenticationString}`;
 
@@ -126,13 +126,14 @@ async function getUserData(sessionKey){
 
 async function getDevices(sessionKey){
     const params = "?fields=name,publicId,activeVpnSession,servers,dataMonitors,dataReports";
-    const devicesUri = linkDict["Agent"].replace("/{publicId}", params);
+    const devicesUri = linkDict["AgentList"] + params;
     const requestData = {
         uri: devicesUri,
         method: "GET",
         headers: {
             "Accept": "application/json",
             "IXapi-Application": applicationId,
+	        "IXapi-Company": companyId,
             "IXapi-Version": "1",
             "Authorization": `Bearer ${sessionKey}`,
             "User-Agent": null
