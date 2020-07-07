@@ -16,4 +16,7 @@ app.use("/", accountRouter);
 app.use("/public", express.static(publicPath));
 // use this for the server.
 // app.listen(process.env.PORT, () => console.log("server started."));
-app.listen(3000, () => console.log("server started."));
+app.listen(8080, () => console.log("server started on port: ${PORT}"));
+
+
+

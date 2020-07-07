@@ -64,7 +64,7 @@ function formatDevices(jsonData){
             for (let vnc of ewon.lanDevices){
                 const vncObject = {
                     name: vnc.name,
-                    url: encodeURI(`https://eu2.m2web.talk2m.com/${developerId}/${ewon.name}/vnc/${vnc.ip}:${vnc.port}`)
+                    url: encodeURI(`https://eu2.m2web.talk2m.com/${t2mAccount}/${ewon.name}/vnc/${vnc.ip}:${vnc.port}`)
                 }
             device.vncLinks.push(vncObject);
             }
