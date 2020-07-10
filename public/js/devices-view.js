@@ -2,7 +2,7 @@
 export function drawDevices(devices){
 
     for (let i = 0; i < devices.length; i++){
-        // device object must contain: {string name, String id, String routerType, bool isOnline, list vncLinks}
+        // device object must contain: {string name, String id, String routerType, bool isOnline, list links}
         const deviceDiv = $(
             `<a class="device p-0 list-group-item list-group-item-action flex-column align-items-start ${devices[i].routerType}" id="${devices[i].id}">
                 <div class="d-flex w-100 justify-content-between align-items-center"> 
@@ -28,8 +28,9 @@ export function drawUserSession(username, email, permissions){
     $(".user-session .userType").text(userType);
 }
 
-// = device view with vnclinks and dashboardlinks.
+// = device view with links and dashboardlinks.
 export function showDeviceModal(device){
+ 
 
     // list row format in device modal.
     function formatDeviceLink(name, link, isDashboard=false){
@@ -39,7 +40,7 @@ export function showDeviceModal(device){
             </i>`;
         return $(
             `<a class="deviceLink font-weight-normal list-group-item list-group-item-action d-flex flex-row left justify-content-between 
-            align-items-center border-bottom-0" target="_blank" href=${link}>
+            align-items-center border-bottom-0" target="_blank" href="${link}">
                 <div class=" d-flex justify-content-center">
                     ${icon}${name}
                 </div>
@@ -51,7 +52,7 @@ export function showDeviceModal(device){
 
     $("#deviceModal .deviceName").text(device.name);
     $("#deviceModal .deviceName").append(formatDeviceStatusBall(device.isOnline));
-    $(".vncLinkList").empty();
+    $(".linkList").empty();
     $(".dashboardList").empty();
     $(".vncHeader").show();
     // hide dashboardHeader
@@ -60,8 +61,8 @@ export function showDeviceModal(device){
 
 
     // vnc links
-    // Display "error message" if there are no vncLinks available.
-    if (device.vncLinks.length === 0) {
+    // Display "error message" if there are no links available.
+    if (device.links.length === 0) {
         const message = $(
             `<div class='text-center px-5 pt-3 pb-5'>
                 <i class="material-icons mb-2 md-36">
@@ -70,11 +71,11 @@ export function showDeviceModal(device){
             <h6>Er zijn geen apparaten beschikbaar.</h6>`);
 
         $(".vncHeader").hide();
-        $(".vncLinkList").append(message);
+        $(".linkList").append(message);
     } 
     else {
-        for (let vncLink of device.vncLinks){
-            $(".vncLinkList").append(formatDeviceLink(vncLink.name, vncLink.url));
+        for (let deviceLink of device.links){
+            $(".linkList").append(formatDeviceLink(deviceLink.name, deviceLink.url));
         }
     }
     // data monitors (actual dashboards)

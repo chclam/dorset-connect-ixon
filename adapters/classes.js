@@ -4,9 +4,9 @@ class Device {
 	    this.name = name;
 	    this.isOnline = isOnline;
 	    this.routerType = routerType;
-	    this.vncLinks = [];
+	    this.links = [];
 	    this.dataMonitors = [];
-	    this.dataReports = [];
+			this.dataReports = [];
 	}
 }
 

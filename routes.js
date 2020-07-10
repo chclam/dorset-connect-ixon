@@ -118,9 +118,14 @@ router.get("/devices", async (req, res) => {
 router.get("/devices/ixon", async (req, res) => {
     try {
         const ixonSession = req.cookies["ixon-session"];
-        const deviceData = await ixon.getDevices(ixonSession);
 
-        res.status(200).json({"status": "success", "data": deviceData});
+        const deviceData = await ixon.getDevices(ixonSession);
+        // deviceData only contains data for the vnc servers but not for
+        // the http servers, appendHttpServers() retrieves these links.
+        await ixon.appendHttpServers(ixonSession, deviceData);
+
+        const formattedDevices = ixon.formatDevices(deviceData);
+        res.status(200).json({"status": "success", "data": formattedDevices});
     }
     catch (e){
         res.status(401).send();
@@ -131,8 +136,6 @@ router.get("/devices/ixon/user", async (req, res) => {
     try {
         const ixonSession = req.cookies["ixon-session"];
         const userData = await ixon.getUserData(ixonSession);
-
-        // console.log("hoi");
 
 
         res.status(200).json({"status": "success", "data": userData});
@@ -150,7 +153,8 @@ router.get("/devices/ewon", async (req, res) => {
         res.status(200).json({"status": "success", "data": deviceData});
     }
     catch (e){
-        res.status(401).send();
+        console.log(e);
+        res.status(401).send(e);
     }
 });
 

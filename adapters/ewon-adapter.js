@@ -1,6 +1,7 @@
 const requestPromise = require("request-promise");
 const config = require("./adapter-config");
 const classes = require("./classes.js");
+const { json } = require("express");
 const Device = classes.Device;
 
 const host = "https://m2web.talk2m.com/t2mapi";
@@ -55,18 +56,21 @@ async function getDevices(sessionKey){
 
 function formatDevices(jsonData){
     const ewons = [];
+    
     for (let ewon of jsonData){
+        
         const device = new Device(ewon.id.toString(), ewon.name, false, "ewon");
 
         if (ewon.status === "online") device.isOnline = true;
 
         if (ewon.lanDevices.length > 0) {
-            for (let vnc of ewon.lanDevices){
-                const vncObject = {
-                    name: vnc.name,
-                    url: encodeURI(`https://eu2.m2web.talk2m.com/${t2mAccount}/${ewon.name}/vnc/${vnc.ip}:${vnc.port}`)
+            
+            for (let lanDevice of ewon.lanDevices){
+                const deviceLink = {
+                    name: lanDevice.name,
+                    url: encodeURI(`https://${ewon.m2webServer}/${t2mAccount}/${ewon.name}/vnc/${lanDevice.ip}:${lanDevice.port}`)
                 }
-            device.vncLinks.push(vncObject);
+            device.links.push(deviceLink);
             }
         }
         ewons.push(device);
@@ -126,4 +130,4 @@ async function checkSession(sessionKey){
     }
 }
 
-module.exports = {getSession, getDevices, deleteSession, checkSession, getAdapterName};
+module.exports = {getSession, getDevices, deleteSession, checkSession, getAdapterName, formatDevices};

@@ -125,7 +125,7 @@ async function getUserData(sessionKey){
 }
 
 async function getDevices(sessionKey){
-    const params = "?fields=name,publicId,activeVpnSession,servers,dataMonitors,dataReports";
+    const params = "?fields=name,publicId,activeVpnSession,servers.publicId,servers.name,servers.type,dataMonitors,dataReports";
     const devicesUri = linkDict["AgentList"] + params;
     const requestData = {
         uri: devicesUri,
@@ -143,7 +143,7 @@ async function getDevices(sessionKey){
     try {
         let jsonResponse = await requestPromise(requestData);
         jsonResponse = JSON.parse(jsonResponse);
-        return formatDevices(jsonResponse.data);
+        return jsonResponse.data;
     }
     catch (e){
         throw "Device retrieval failed.";
@@ -151,21 +151,85 @@ async function getDevices(sessionKey){
 }
 
 
+async function appendHttpServers(sessionKey, devices) {
+   
+    const httpServers = [];
 
-function formatDevices(jsonData){
+    for (let device of devices){
+        for (deviceServer of device["servers"]){
+            if (deviceServer.type === "http"){
+                x = {
+                    "server": {
+                        "publicId": deviceServer.publicId
+                    },
+                    "method": "http"
+                }
+                httpServers.push(x)
+            }
+        }
+    }
+
+    const requestData = {
+        uri: linkDict["WebAccessList"] + "?fields=*",
+        method: "POST",
+        headers: {
+            "Accept": "application/json",
+            "IXapi-Application": applicationId,
+            "IXapi-Company": companyId,
+            "Authorization": `Bearer ${sessionKey}`,
+            "IXapi-Version": "1",
+            "User-Agent": null
+        },
+        body: httpServers,
+        json: true
+    };
+
+
+    try {
+        let sessionData = await requestPromise(requestData);
+
+        // append the requested links to the devices in the parameter
+        let httpLinkCounter = 0;
+        for (let device of devices){
+            for (deviceServer of device["servers"]){
+                if (deviceServer.type === "http"){
+                    deviceServer["link"] = sessionData["data"][httpLinkCounter]["url"];
+                    httpLinkCounter++;
+                }
+            }
+        }
+    }
+    catch (e) {
+        console.error(e);
+        throw "Http servers request failed.";
+    }
+}
+
+
+function formatDevices(deviceData){
     const ixons = [];
 
-    for (let ixon of jsonData){
+    for (let ixon of deviceData){
         const device = new classes.Device(ixon.publicId, ixon.name, false, "ixon");
 
         if (ixon.activeVpnSession !== null) device.isOnline = true;
-        // set up vnc links
-        for (let vnc of ixon.servers){
-            const vncObject = {
-                name: vnc.name,
-                url: encodeURI(`https://connect.ixon.cloud/agents/${ixon.publicId}/Web-Access/VNC/${vnc.publicId}`)
+        // set up links
+        for (let link of ixon.servers){
+            let url;
+
+            if (link.type === "http"){
+                url = link.link;
             }
-            device.vncLinks.push(vncObject);
+            else {
+                url = `https://connect.ixon.cloud/agents/${ixon.publicId}/Web-Access/VNC/${link.publicId}`;
+            }
+
+            const linkObject = {
+                name: link.name,
+                url: encodeURI(url)
+            }
+            
+            device.links.push(linkObject);
         }
         for (let monitor of ixon.dataMonitors){
             const dataMonitor = {
@@ -256,7 +320,8 @@ function updateLinkList(linkList){
     }
 }
 
+
 // Initial call to get link list after server start.
 getLinkList();
 
-module.exports = {getLinkList, getSession, getDevices, deleteSession, checkSession, getAdapterName, getPermissions, getUserData};
+module.exports = {getLinkList, getSession, getDevices, deleteSession, checkSession, getAdapterName, getPermissions, getUserData, appendHttpServers, formatDevices};
