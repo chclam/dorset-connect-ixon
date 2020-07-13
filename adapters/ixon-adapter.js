@@ -157,6 +157,7 @@ async function appendHttpServers(sessionKey, devices) {
 
     for (let device of devices){
         for (deviceServer of device["servers"]){
+            // if there are http servers and if the device is online
             if (deviceServer.type === "http" && device.activeVpnSession !== null){
                 x = {
                     "server": {
@@ -168,6 +169,9 @@ async function appendHttpServers(sessionKey, devices) {
             }
         }
     }
+
+    // Stop if there are no http servers to retrieve, i.e. no device is online
+    if (httpServers.length === 0) return;
 
     const requestData = {
         uri: linkDict["WebAccessList"],
