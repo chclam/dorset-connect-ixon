@@ -40,7 +40,7 @@ export function showDeviceModal(device){
             </i>`;
         return $(
             `<a class="deviceLink font-weight-normal list-group-item list-group-item-action d-flex flex-row left justify-content-between 
-            align-items-center border-bottom-0" target="_blank" href="${link}">
+            align-items-center border-bottom-0" target="_blank" ${link === null ? null : `href=${link}`}>
                 <div class=" d-flex justify-content-center">
                     ${icon}${name}
                 </div>

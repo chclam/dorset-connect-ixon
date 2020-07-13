@@ -221,16 +221,19 @@ function formatDevices(deviceData){
         for (let link of ixon.servers){
             let url;
 
-            if (link.type === "http"){
+            if (link.type === "http" && link.link !== undefined){
                 url = link.link;
             }
-            else {
+            else if (link.type === "vnc"){
                 url = `https://connect.ixon.cloud/agents/${ixon.publicId}/Web-Access/VNC/${link.publicId}`;
+            }
+            else {
+                url = null;
             }
 
             const linkObject = {
                 name: link.name,
-                url: encodeURI(url)
+                url: (url === null) ? null : encodeURI(url)
             }
             
             device.links.push(linkObject);
