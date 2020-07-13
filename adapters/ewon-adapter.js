@@ -66,11 +66,18 @@ function formatDevices(jsonData){
         if (ewon.lanDevices.length > 0) {
             
             for (let lanDevice of ewon.lanDevices){
+                let url = null;
+
+                if (device.isOnline){
+                    url = encodeURI(`https://${ewon.m2webServer}/${t2mAccount}/${ewon.name}/vnc/${lanDevice.ip}:${lanDevice.port}`);
+                }
+
                 const deviceLink = {
                     name: lanDevice.name,
-                    url: encodeURI(`https://${ewon.m2webServer}/${t2mAccount}/${ewon.name}/vnc/${lanDevice.ip}:${lanDevice.port}`)
+                    url: url
                 }
-            device.links.push(deviceLink);
+
+                device.links.push(deviceLink);
             }
         }
         ewons.push(device);

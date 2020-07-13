@@ -216,28 +216,33 @@ function formatDevices(deviceData){
     for (let ixon of deviceData){
         const device = new classes.Device(ixon.publicId, ixon.name, false, "ixon");
 
-        if (ixon.activeVpnSession !== null) device.isOnline = true;
+        if (ixon.activeVpnSession !== null) {
+            device.isOnline = true;
+        }
+
         // set up links
         for (let link of ixon.servers){
-            let url;
+            let url = null;
 
-            if (link.type === "http" && link.link !== undefined){
-                url = link.link;
-            }
-            else if (link.type === "vnc"){
-                url = `https://connect.ixon.cloud/agents/${ixon.publicId}/Web-Access/VNC/${link.publicId}`;
-            }
-            else {
-                url = null;
+            if (device.isOnline){
+                if (link.type === "http" && link.link !== undefined){
+                    url = link.link;
+                }
+                else if (link.type === "vnc"){
+                    url = `https://connect.ixon.cloud/agents/${ixon.publicId}/Web-Access/VNC/${link.publicId}`;
+                }
+
+                url = encodeURI(url);
             }
 
             const linkObject = {
                 name: link.name,
-                url: (url === null) ? null : encodeURI(url)
+                url: url
             }
             
             device.links.push(linkObject);
         }
+
         for (let monitor of ixon.dataMonitors){
             const dataMonitor = {
                 name: monitor.name,
@@ -245,6 +250,7 @@ function formatDevices(deviceData){
             }
             device.dataMonitors.push(dataMonitor);
         }
+
         for (let report of ixon.dataReports){
             const dataReport = {
                 name: report.name,

@@ -31,7 +31,6 @@ export function drawUserSession(username, email, permissions){
 // = device view with links and dashboardlinks.
 export function showDeviceModal(device){
  
-
     // list row format in device modal.
     function formatDeviceLink(name, link, isDashboard=false){
         const icon = 
@@ -45,7 +44,7 @@ export function showDeviceModal(device){
                     ${icon}${name}
                 </div>
                 <i class="material-icons">
-                    arrow_right
+                    ${link === null ? "link_off" : "link" }
                 </i>
             </a>`);
     }
