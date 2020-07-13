@@ -157,7 +157,7 @@ async function appendHttpServers(sessionKey, devices) {
 
     for (let device of devices){
         for (deviceServer of device["servers"]){
-            if (deviceServer.type === "http"){
+            if (deviceServer.type === "http" && device.activeVpnSession !== null){
                 x = {
                     "server": {
                         "publicId": deviceServer.publicId
@@ -170,7 +170,7 @@ async function appendHttpServers(sessionKey, devices) {
     }
 
     const requestData = {
-        uri: linkDict["WebAccessList"] + "?fields=*",
+        uri: linkDict["WebAccessList"],
         method: "POST",
         headers: {
             "Accept": "application/json",
