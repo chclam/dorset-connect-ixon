@@ -1,0 +1,13 @@
+{
+	"ixon": {
+		"url": "",
+		"applicationId": "",
+		"companyId": ""
+	},
+	"ewon": {
+		"developerId": "",
+		"account": "",
+		"username": "",
+		"password": "" 
+	}
+}
