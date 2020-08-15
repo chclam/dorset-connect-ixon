@@ -6,6 +6,7 @@ const config = require("./adapters/adapter-config");
 
 const ixon = require("./adapters/ixon-adapter");
 const ewon = require("./adapters/ewon-adapter");
+const mysql = require("mysql")
 
 async function getAdapterSession(username, password, adapter, expiresIn, twoFactorAuthentication){
     if(adapter.getAdapterName() === "ixon" && twoFactorAuthentication.length > 0){
@@ -19,19 +20,6 @@ function setSessionCookies(res, sessionKey, adapterName, expiresIn){
     return res;
 }
 
-async function hasValidSession(ixonSession){
-    // launches a promise to check the validity of the ixon session.
-    // resolves boolean value based on their validity. the functions never
-    // reject due the nature of promise.all. promise.any is not implemented yet.
-    return ixonSessionCheckPromise = ixon.checkSession(ixonSession)
-        .then((ixonValidSession) => {
-            if (ixonValidSession){
-                return true;
-            }
-            return false;
-        })
-        .catch(e => console.error(e));
-}
 
 /****************
  * Sign in routes 
@@ -39,8 +27,9 @@ async function hasValidSession(ixonSession){
 
 router.get("/", async (req, res) => {
     const iSession = req.cookies["ixon-session"];
+    const validSession = await ixon.isValidSession(iSession);
 
-    if (await hasValidSession(iSession)){
+    if (validSession){
         res.redirect("/devices");
     } else {
         res.status(200).sendFile(path.join(srcPath, "/signin.html"));
@@ -50,11 +39,11 @@ router.get("/", async (req, res) => {
 router.post("/signin/ixon", async (req, res) => {
     const ixon = require("./adapters/ixon-adapter");
     const ewon = require("./adapters/ewon-adapter");
-    let username = req.body.username;
-    let password = req.body.password;
+    const username = req.body.username;
+    const password = req.body.password;
     const twoFactorAuthentication = req.body.twoFactorAuthentication;
-    let ixonPermissions;
     const expiresIn = 3600; // in seconds
+    let ixonPermissions;
 
     try {
         await ixon.getLinkList();
@@ -101,14 +90,16 @@ router.get("/signout", async (req, res) => {
     }
 });
 
+
 /****************
  * Devices routes
 ****************/
 
 router.get("/devices", async (req, res) => {
     const iSession = req.cookies["ixon-session"];
+    const validSession = await ixon.isValidSession(iSession);
 
-    if (await hasValidSession(iSession)){
+    if (validSession){
         res.status(200).sendFile(path.join(srcPath, "/device-list.html"));
     } else {
         res.redirect("/");
@@ -137,12 +128,29 @@ router.get("/devices/ixon/user", async (req, res) => {
         const ixonSession = req.cookies["ixon-session"];
         const userData = await ixon.getUserData(ixonSession);
 
-
         res.status(200).json({"status": "success", "data": userData});
     }
     catch (e){
         res.status(404).send(e);
     }
+});
+
+router.get("/devices/ixon/recentErrors", async (req, res) => {
+    // add ixon verification. i.e. access to sql iff access via ixon.
+    const ixonSession = req.cookies["ixon-session"];
+    const validSession = await ixon.isValidSession(ixonSession);
+
+    if (!validSession){
+        res.status(401).send("Unauthorized ");
+    }
+
+    const credentials = config.mysql;
+    const con = mysql.createConnection(credentials);
+    const query = "SELECT * FROM recenterrors";
+   
+    con.query(query, (error, results) => {
+        res.status(200).send({"status": "succes", "data": results});
+    });
 });
 
 router.get("/devices/ewon", async (req, res) => {
@@ -161,13 +169,16 @@ router.get("/devices/ewon", async (req, res) => {
 router.get("/devices/ewon/alive", async (req, res) => {
     try {
         const ewonSession = req.cookies["ewon-session"];
-        const response = await ewon.checkSession(ewonSession);
-        if (!response) throw new Error;
+        const validSession = await ewon.isValidSession(ewonSession);
+
+        if (!validSession) throw new Error;
+
         res.status(200).json({"status": "success"});
     }
     catch (e){
         res.status(401).json({"status": "failed"});
     }
 });
+
 
 module.exports = router;

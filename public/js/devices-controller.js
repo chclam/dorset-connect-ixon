@@ -83,7 +83,7 @@ $(document).ready(function() {
 
     init();
     
-    // keep ewon connection alive
+    // keep ewon connection alive; setInterval keeps repeating.
     const interval = 300000; // in ms
     setInterval(() => fetcher.keepAliveEwon(), interval);
 });
@@ -131,7 +131,7 @@ function init(){
             return Promise.resolve([]);
         });
 
-    const ewonPromise = fetcher.getEwons()
+     const ewonPromise = fetcher.getEwons()
         .then(devices => {
             return Promise.resolve(devices);
         })
@@ -140,9 +140,22 @@ function init(){
             return Promise.resolve([]);
         });
 
+     const mySqlPromise = fetcher.getSqlErrors()
+        .then(devices => {
+            return Promise.resolve(devices);
+        })
+        .catch(e => {
+            // IMPORTANTTTTT
+            // errorHandler.ewonRequest(e);
+            console.error(e);
+            return Promise.resolve([]);
+        });
+
     // show on page as soon as either device type is loaded.
-    Promise.all([ixonPromise, ewonPromise])
-        .then(([ixonDevices, ewonDevices]) => {
+    Promise.all([ixonPromise, ewonPromise, mySqlPromise])
+        .then(([ixonDevices, ewonDevices, mySqlPromise]) => {
+            
+            console.log(mySqlPromise);
 
             // if both are not loaded.
             if (ixonDevices.length === 0 && ewonDevices.length === 0) throw "no session retrieved";

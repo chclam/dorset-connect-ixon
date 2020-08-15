@@ -73,7 +73,7 @@ function formatDevices(jsonData){
                 }
 
                 const deviceLink = {
-                    name: lanDevice.name,
+
                     url: url
                 }
 
@@ -113,7 +113,7 @@ async function deleteSession(sessionKey){
 // get account info with given sessionkey from the client.
 // Receives an error if sessionkey is invalid. The function will then
 // resolve either false or true based on the validity of the sessionkey.
-async function checkSession(sessionKey){
+async function isValidSession(sessionKey){
 
     if (sessionKey === undefined) return Promise.resolve(false);
 
@@ -137,4 +137,4 @@ async function checkSession(sessionKey){
     }
 }
 
-module.exports = {getSession, getDevices, deleteSession, checkSession, getAdapterName, formatDevices};
+module.exports = {getSession, getDevices, deleteSession, isValidSession, getAdapterName, formatDevices};

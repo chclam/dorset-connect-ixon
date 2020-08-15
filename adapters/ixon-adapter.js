@@ -290,9 +290,9 @@ async function deleteSession(sessionKey){
 
 // makea  basic discovery request with sessionkey. If the sessionkey 
 // is expired it will receive an error from the server.
-async function checkSession(sessionKey){
+async function isValidSession(sessionKey=null){
 
-    if (sessionKey === undefined) return Promise.resolve(false);
+    if (sessionKey === null) return Promise.resolve(false);
 
     const requestData = {
         uri: "https://api.ixon.net:443/",
@@ -337,4 +337,4 @@ function updateLinkList(linkList){
 // Initial call to get link list after server start.
 getLinkList();
 
-module.exports = {getLinkList, getSession, getDevices, deleteSession, checkSession, getAdapterName, getPermissions, getUserData, appendHttpServers, formatDevices};
+module.exports = {getLinkList, getSession, getDevices, deleteSession, isValidSession, getAdapterName, getPermissions, getUserData, appendHttpServers, formatDevices};

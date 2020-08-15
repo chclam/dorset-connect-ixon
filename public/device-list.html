@@ -1,126 +1,127 @@
 <html>
-	<head>
-		<link rel="stylesheet" type="text/css" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
-		<link href="https://cdnjs.cloudflare.com/ajax/libs/mdbootstrap/4.8.3/css/mdb.min.css" rel="stylesheet">
-		<link rel="stylesheet" type="text/css" href="/public/style.css">
-		<link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
-		<link rel="icon" type="image/png"
+  <head>
+    <link rel="stylesheet" type="text/css" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/mdbootstrap/4.8.3/css/mdb.min.css" rel="stylesheet">
+    <link rel="stylesheet" type="text/css" href="/public/style.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+    <link rel="icon" type="image/png"
  href="/public/img/favicon.png">
-		<title>Installaties - Dorset Connect</title>
-	</head>
-	<body>
-		<div class="pos-f-t wrapper">
-			<nav class="navbar fixed-top navbar-light justify-content-between bg-white border-bottom">
-				<a class="d-flex justify-content-between align-items-center" href="/"><img id="navbar-brand" src="/public/img/dorset-connect-horizontal.png" alt="Dorset">
-					<p class="logoText ml-2 mt-3">DORSET CONNECT</p>
-				</a>
-				<!-- <h4 class="navbar-center">Installaties</h4> -->
-				<i class="material-icons account_circle accounts-btn" data-toggle="dropdown" data-target="#navbarToggleExternalContent" aria-haspopup="true" aria-expanded="false">account_circle</i>
-				<div class="dropdown-menu dropdown-menu-right z-depth-1" aria-labelledby="dropdownMenuButton">
-					<!-- Ixon sign in status (signed in) -->
-					
-					<div class="user-session d-flex flex-column px-2">
-						<div class="d-flex flex-column text-center d-flex justify-content-center m-3">
-							<div class="text-center my-3">
-								<img class="w-25 d-inline-block" src="public/img/ixon-badge.jpg" alt="ixon">
-							</div>
-							<h5 class="font-weight-bolder name"></h5> 
-							<p class="text-muted email"></p>
-							<small class="text-muted userType"></small> 
-							<!-- divider -->
-							<div class="dropdown-divider my-2"></div>
-							<a href="/signout"><button class="btn btn-outline-primary waves-effect signout-btn ixon">
-							Afmelden</button>
-							</a>
-						</div>
-						<!-- <div class="offline d-flex justify-content-center"></div> -->
-					</div>
-				</div>
-			</nav>
-				<div class="container text-center">
-					<div class="devices-request-statuses" role="alert"></div>
-					<div class="row py-3">
-						<div class="col-lg-12">
-								<div class="deviceListHeader text-center animated fadeIn">
-									<!-- Search form -->
-									<div class="input-group search w-100 my-4">
-										<input class="form-control form-control w-100 px-5 py-4 z-depth-1" id="deviceSearch" type="text" placeholder="Zoek installaties" aria-label="Search">
-										<div class="d-flex flex-row w-100 justify-content-between">
-											<i class="material-icons searchIcon md-dark md-inactive ml-3">search</i>
-											<i class="material-icons  md-dark md-inactive cancelSearch mr-3">cancel</i>
-										</div>
-									</div>
-								</div>
-						</div>
-					</div>
-					<!-- device view modal-->
-					<div class="modal" id="deviceModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
-						<div class="modal-dialog modal-dialog-centered zoomIn animated fastest" role="document">
-							<div class="modal-content text-left p-2">
-								<div class="modal-header">
-									<h5 class="deviceName font-weight-normal" id="ModalLabel"></h5>
-									<button type="button" class="close" data-dismiss="modal" aria-label="Close">
-										<span aria-hidden="true">&times;</span>
-									</button>
-								</div>
-								<div class="modal-body">
-									<h6 class="vncHeader linkHeader">VNC-apparaten</h6>
-									<div class="linkList list-group list-group-flush"></div>
-									<h6 class="dashboardHeader linkHeader mt-4">Dashboards</h6>
-									<div class="dashboardList list-group list-group-flush"></div>
-								</div>
-							</div>
-						</div>
-					</div>
-					<!-- Devices section -->
-					<div class="devices row mb-2 text-center">
-						<div class="col-lg-12">
-							<div class="deviceSpinner spinner-border text-muted" role="status">
-				    			<span class="sr-only">Loading...</span>
-							</div>
-								<div id="deviceListDiv" class="d-none">
-								<!-- Filter buttons -->
-									<div class="filters d-flex justify-content-between mb-2">
-										<button type="button" class="btn btn-link p-0 my-2 animated faster d-flex align-items-center text-muted">
-											<i class="material-icons md-18 mr-1">filter_list</i>Filters
-										</button>
-										<div class="justify-content-right select animated fadeInDown fastest d-none">
-											<div id="statusFilterDiv" class="d-flex flex-row align-items-baseline justify-content-baseline mr-3 animated">
-												<h6 class="d-flex flex-row font-weight-normal mr-2">Beschikbaarheid:</h6>
-												<select id="filter-status" class="custom-select custom-select-sm">
-													<option value="" selected>Alle</option>
-													<option value="online">Online</option>
-													<option value="offline">Offline</option>
-												</select>
-											</div>
-	    									<div id="routerFilterDiv" class="d-flex flex-row align-items-baseline justify-content-baseline mr-3 animated">
-		    									<h6 class="font-weight-normal mr-2">Routertype:</h6>
-		    									<select id="filter-device" class="custom-select custom-select-sm">
-													<option value="" selected>Alle</option>
-													<option value="ixon">Ixon</option>
-													<option value="ewon">Ewon</option>
-												</select>
-											</div>
-										</div>
-									</div>
-								<div class="deviceList list-group animated fadeInUp fast"></div>
-								<div id="noDevices" class='d-none text-center mt-5 px-5 pt-3 pb-5'>
-	                				<i class="material-icons mb-2 md-36">
-	                    				info
-	                				</i>
-	            					<h6>Er zijn geen installaties gevonden.</h6>
-	            				</div>
-            				</div>
-						</div>
-					</div>
-				</div>
-			</div>
-		</div>
-		<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.0/jquery.min.js"></script>
-		<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
-		<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mdbootstrap/4.8.3/js/mdb.min.js"></script>
-		<script type="module" src="/public/js/devices-controller.js"></script>
-		<script type="module" src="/public/js/signin-view.js"></script>
-	</body>
+    <title>Installaties - Dorset Connect</title>
+  </head>
+  <body>
+    <div class="pos-f-t wrapper">
+      <nav class="navbar fixed-top navbar-light justify-content-between bg-white border-bottom">
+        <a class="d-flex justify-content-between align-items-center" href="/"><img id="navbar-brand" src="/public/img/dorset-connect-horizontal.png" alt="Dorset">
+          <p class="logoText ml-2 mt-3">DORSET CONNECT</p>
+        </a>
+        <!-- <h4 class="navbar-center">Installaties</h4> -->
+        <i class="material-icons account_circle accounts-btn" data-toggle="dropdown" data-target="#navbarToggleExternalContent" aria-haspopup="true" aria-expanded="false">account_circle</i>
+        <div class="dropdown-menu dropdown-menu-right z-depth-1" aria-labelledby="dropdownMenuButton">
+          <!-- Ixon sign in status (signed in) -->
+          
+          <div class="user-session d-flex flex-column px-2">
+            <div class="d-flex flex-column text-center d-flex justify-content-center m-3">
+              <div class="text-center my-3">
+                <img class="w-25 d-inline-block" src="public/img/ixon-badge.jpg" alt="ixon">
+              </div>
+              <h5 class="font-weight-bolder name"></h5> 
+              <p class="text-muted email"></p>
+              <small class="text-muted userType"></small> 
+              <!-- divider -->
+              <div class="dropdown-divider my-2"></div>
+              <a href="/signout"><button class="btn btn-outline-primary waves-effect signout-btn ixon">
+              Afmelden</button>
+              </a>
+            </div>
+            <!-- <div class="offline d-flex justify-content-center"></div> -->
+          </div>
+        </div>
+      </nav>
+        <div class="container text-center">
+          <div class="devices-request-statuses" role="alert"></div>
+          <div class="row py-3">
+            <div class="col-lg-12">
+                <div class="deviceListHeader text-center animated fadeIn">
+                  <!-- Search form -->
+                  <div class="input-group search w-100 my-4">
+                    <input class="form-control form-control w-100 px-5 py-4 z-depth-1" id="deviceSearch" type="text" placeholder="Zoek installaties" aria-label="Search">
+                    <div class="d-flex flex-row w-100 justify-content-between">
+                      <i class="material-icons searchIcon md-dark md-inactive ml-3">search</i>
+                      <i class="material-icons  md-dark md-inactive cancelSearch mr-3">cancel</i>
+                    </div>
+                  </div>
+                </div>
+            </div>
+          </div>
+          <!-- device view modal-->
+          <div class="modal" id="deviceModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered zoomIn animated fastest" role="document">
+              <div class="modal-content text-left p-2">
+                <div class="modal-header">
+                  <h5 class="deviceName font-weight-normal" id="ModalLabel"></h5>
+                  <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                  </button>
+                </div>
+                <div class="modal-body">
+                  <h6 class="vncHeader linkHeader">VNC-apparaten</h6>
+                  <div class="linkList list-group list-group-flush"></div>
+                  <h6 class="dashboardHeader linkHeader mt-4">Dashboards</h6>
+                  <div class="dashboardList list-group list-group-flush"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <!-- Devices section -->
+          <div class="devices row mb-2 text-center">
+            <div class="col-lg-12">
+              <div class="deviceSpinner spinner-border text-muted" role="status">
+                  <span class="sr-only">Loading...</span>
+              </div>
+                <div id="deviceListDiv" class="d-none">
+                <!-- Filter buttons -->
+                  <div class="filters d-flex justify-content-between mb-2">
+                    <button type="button" class="btn btn-link p-0 my-2 animated faster d-flex align-items-center text-muted">
+                      <i class="material-icons md-18 mr-1">filter_list</i>Filters
+                    </button>
+                    <div class="justify-content-right select animated fadeInDown fastest d-none">
+                      <div id="statusFilterDiv" class="d-flex flex-row align-items-baseline justify-content-baseline mr-3 animated">
+                        <h6 class="d-flex flex-row font-weight-normal mr-2">Beschikbaarheid:</h6>
+                        <select id="filter-status" class="custom-select custom-select-sm">
+                          <option value="" selected>Alle</option>
+                          <option value="online">Online</option>
+                          <option value="offline">Offline</option>
+                        </select>
+                      </div>
+                        <div id="routerFilterDiv" class="d-flex flex-row align-items-baseline justify-content-baseline mr-3 animated">
+                          <h6 class="font-weight-normal mr-2">Routertype:</h6>
+                          <select id="filter-device" class="custom-select custom-select-sm">
+                          <option value="" selected>Alle</option>
+                          <option value="ixon">Ixon</option>
+                          <option value="ewon">Ewon</option>
+                        </select>
+                      </div>
+                    </div>
+                  </div>
+                <!-- List of devices -->
+                <div class="deviceList list-group animated fadeInUp fast"></div>
+                <div id="noDevices" class='d-none text-center mt-5 px-5 pt-3 pb-5'>
+                          <i class="material-icons mb-2 md-36">
+                              info
+                          </i>
+                        <h6>Er zijn geen installaties gevonden.</h6>
+                      </div>
+                    </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.0/jquery.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mdbootstrap/4.8.3/js/mdb.min.js"></script>
+    <script type="module" src="/public/js/devices-controller.js"></script>
+    <script type="module" src="/public/js/signin-view.js"></script>
+  </body>
 </html>
 

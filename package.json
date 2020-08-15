@@ -3,12 +3,13 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
-    "dev": "nodemon server.js"
+    "dev": "nodemon server.js",
+    "start": "node server.js"
   },
   "author": "",
   "license": "ISC",
   "devDependencies": {
-    "dotenv": "^8.0.0",
+    "dotenv": "^8.2.0",
     "nodemon": "^1.19.4"
   },
   "dependencies": {
@@ -16,8 +17,9 @@
     "crypto-js": "^3.1.9-1",
     "express": "^4.17.1",
     "multer": "^1.4.1",
+    "mysql": "^2.18.1",
     "request": "^2.88.0",
     "request-promise": "^4.2.4"
   },
-  "description": ""
+  "description": "Dorset Connect allows you to access all your Ixon and Ewon devices in one list. Gain access to all your devices by simply signing in with your Ixon account.  Access to the Ewon devices is gained by providing your sign-in information for Ewon (among other relevant information) in the config file: adapters/adapter-config.json."
 }

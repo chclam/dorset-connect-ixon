@@ -7,7 +7,7 @@ export function drawDevices(devices){
             `<a class="device p-0 list-group-item list-group-item-action flex-column align-items-start ${devices[i].routerType}" id="${devices[i].id}">
                 <div class="d-flex w-100 justify-content-between align-items-center"> 
                     <h6 class="font-weight-normal deviceName m-3">${formatDeviceStatusBall(devices[i].isOnline)} ${devices[i].name}</h6>
-                    <small class="routerType mr-4">${devices[i].routerType}</small>
+                    <small class="routerType mr-4">${devices[i].routerType} | Storingen: 0</small>
                 </div>
             </a>`
             );
