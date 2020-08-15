@@ -73,7 +73,7 @@ function formatDevices(jsonData){
                 }
 
                 const deviceLink = {
-
+                    name: lanDevice.name,
                     url: url
                 }
 

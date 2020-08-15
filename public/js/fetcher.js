@@ -1,17 +1,16 @@
 async function retrieveServerData(path){
     if (typeof(path) !== "string") throw TypeError("path must be a string");
-    console.log(`${window.location.protocol}//${window.location.hostname}:${window.location.port}/${path}`);
 
     return new Promise((resolve, reject) => {
-        $.ajax({
-          url: `${window.location.protocol}//${window.location.hostname}:${window.location.port}/${path}`,
-            success: (jsonData) => {
-                resolve(jsonData.data);
-            },
-            error: (error) => {
-                reject(error);
-            }
-        });
+         $.ajax({
+              url: `${window.location.protocol}//${window.location.hostname}:${window.location.port}/${path}`,
+                  success: (jsonData) => {
+                     resolve(jsonData.data);
+                 },
+                 error: (error) => {
+                     reject(error);
+                 }
+       });
     });
 }
 
