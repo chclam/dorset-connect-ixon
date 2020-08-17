@@ -38,9 +38,13 @@ async function getLinkList() {
     }
 }
 
-async function getPermissions(sessionKey){
+async function getPermissions(sessionKey=""){
     href = linkDict["UserPermissions"];
     href = href.replace("{publicId}", "me");
+
+    if (sessionKey.length === 0) {
+        throw "Sessionkey must not be empty";
+    }
 
     try {
         const requestData = {
@@ -125,7 +129,7 @@ async function getUserData(sessionKey){
 }
 
 async function getDevices(sessionKey){
-    const params = "?fields=name,publicId,activeVpnSession,servers.publicId,servers.name,servers.type,dataMonitors,dataReports";
+    const params = "?fields=name,publicId,activeVpnSession,devices.*,servers.*,dataMonitors,dataReports";
     const devicesUri = linkDict["AgentList"] + params;
     const requestData = {
         uri: devicesUri,
@@ -213,59 +217,68 @@ async function appendHttpServers(sessionKey, devices) {
 function formatDevices(deviceData){
     const ixons = [];
 
-    for (let ixon of deviceData){
-        const device = new classes.Device(ixon.publicId, ixon.name, false, "ixon");
-
-        if (ixon.activeVpnSession !== null) {
-            device.isOnline = true;
-        }
-
-        // set up links
-        for (let link of ixon.servers){
-            let url = null;
-
-            if (device.isOnline){
-                if (link.type === "http" && link.link !== undefined){
-                    url = link.link;
-                }
-                else if (link.type === "vnc"){
-                    url = `https://connect.ixon.cloud/agents/${ixon.publicId}/Web-Access/VNC/${link.publicId}`;
-                }
-
-                url = encodeURI(url);
-            }
-
-            const linkObject = {
-                name: link.name,
-                url: url
-            }
+    try {
+        for (let ixon of deviceData){
+            const device = new classes.Device(ixon.publicId, ixon.name, false, "ixon");
             
-            device.links.push(linkObject);
-        }
 
-        for (let monitor of ixon.dataMonitors){
-            const dataMonitor = {
-                name: monitor.name,
-                url: encodeURI(`https://connect.ixon.cloud/agents/${ixon.publicId}/data-monitors/${monitor.publicId}`)
+            if (ixon.activeVpnSession !== null) {
+                device.isOnline = true;
             }
-            device.dataMonitors.push(dataMonitor);
-        }
 
-        for (let report of ixon.dataReports){
-            const dataReport = {
-                name: report.name,
-                url: encodeURI(`https://connect.ixon.cloud/agents/${ixon.publicId}/data-reports/${report.publicId}`)
+            // set up links
+            for (const server of ixon.servers){
+                let url = null;
+
+                if (ixon.name === "Service Ixon Zuid Amerika") console.log(ixon, device.isOnline);
+
+                if (device.isOnline){
+                    if (server.type === "http" && ("link" in server)){
+                        url = server.link;
+                    }
+                    else if (server.type === "vnc"){
+                        url = `https://connect.ixon.cloud/agents/${ixon.publicId}/Web-Access/VNC/${server.publicId}`;
+                    }
+                    url = encodeURI(url);
+                }
+
+                const linkObject = {
+                    name: server.name,
+                    url: url
+                }
+                
+                device.links.push(linkObject);
             }
-            device.dataReports.push(dataReport);
+
+            for (const monitor of ixon.dataMonitors){
+                const dataMonitor = {
+                    name: monitor.name,
+                    url: encodeURI(`https://connect.ixon.cloud/agents/${ixon.publicId}/data-monitors/${monitor.publicId}`)
+                }
+                device.dataMonitors.push(dataMonitor);
+            }
+
+            for (const report of ixon.dataReports){
+                const dataReport = {
+                    name: report.name,
+                    url: encodeURI(`https://connect.ixon.cloud/agents/${ixon.publicId}/data-reports/${report.publicId}`)
+                }
+                device.dataReports.push(dataReport);
+            }
+            ixons.push(device);
         }
-        ixons.push(device);
+        return ixons;
     }
-    return ixons;
+
+    catch (e) {
+        console.error("Device formating failed", e);
+        throw "Device retrieval failed";
+    }
 }
 
-async function deleteSession(sessionKey){
+async function deleteSession(sessionKey=""){
 
-    if (sessionKey === undefined) return Promise.resolve("session key is undefined");
+    if (sessionKey.length === 0) return Promise.resolve("session key is undefined");
 
     const devicesUri = linkDict["AccessTokenList"] + "/me";
     const requestData = {
@@ -290,9 +303,9 @@ async function deleteSession(sessionKey){
 
 // makea  basic discovery request with sessionkey. If the sessionkey 
 // is expired it will receive an error from the server.
-async function isValidSession(sessionKey=null){
+async function isValidSession(sessionKey=""){
 
-    if (sessionKey === null) return Promise.resolve(false);
+    if (sessionKey.length === 0) return Promise.resolve(false);
 
     const requestData = {
         uri: "https://api.ixon.net:443/",

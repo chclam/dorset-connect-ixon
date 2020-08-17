@@ -85,9 +85,9 @@ function formatDevices(jsonData){
     return ewons;
 }
 
-async function deleteSession(sessionKey){
+async function deleteSession(sessionKey=""){
 
-    if (sessionKey === undefined) return Promise.resolve("session key is undefined");
+    if (sessionKey.length === 0) return Promise.resolve("session key is undefined");
 
     const requestData = {
         uri: `${host}/logout`,
@@ -113,9 +113,9 @@ async function deleteSession(sessionKey){
 // get account info with given sessionkey from the client.
 // Receives an error if sessionkey is invalid. The function will then
 // resolve either false or true based on the validity of the sessionkey.
-async function isValidSession(sessionKey){
+async function isValidSession(sessionKey=""){
 
-    if (sessionKey === undefined) return Promise.resolve(false);
+    if (sessionKey.length === 0) return Promise.resolve(false);
 
     const requestData = {
         uri: `${host}/getaccountinfo`,

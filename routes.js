@@ -119,7 +119,7 @@ router.get("/devices/ixon", async (req, res) => {
         res.status(200).json({"status": "success", "data": formattedDevices});
     }
     catch (e){
-        res.status(401).send();
+        res.status(401).send("Failed to fetch ixon devices.");
     }
 });
 
@@ -149,7 +149,7 @@ router.get("/devices/ixon/recentErrors", async (req, res) => {
     const query = "SELECT * FROM recenterrors";
    
     con.query(query, (error, results) => {
-        res.status(200).send({"status": "succes", "data": results});
+        res.status(200).send({"status": "success", "data": results});
     });
 });
 

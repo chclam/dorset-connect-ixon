@@ -146,24 +146,27 @@ function init(){
         })
         .catch(e => {
             // IMPORTANTTTTT
-            // errorHandler.ewonRequest(e);
+            // errorHandler.ixonErrorList(e);
             console.error(e);
             return Promise.resolve([]);
         });
 
     // show on page as soon as either device type is loaded.
     Promise.all([ixonPromise, ewonPromise, mySqlPromise])
-        .then(([ixonDevices, ewonDevices, mySqlPromise]) => {
-            
-            console.log(mySqlPromise);
+        .then(([ixonDevices, ewonDevices, mySqlErrors]) => {
 
+            console.log(mySqlErrors);
             // if both are not loaded.
-            if (ixonDevices.length === 0 && ewonDevices.length === 0) throw "no session retrieved";
+            if (ixonDevices.length === 0 && ewonDevices.length === 0) throw "no session retrieved";          
+            mergeErrorData(ixonDevices, mySqlErrors);
 
-            const mergedList = ixonDevices.concat(ewonDevices);
             // sort devices by online status and lexicographical order.
-            sortedDevices = sortDevices(mergedList);
+            sortedDevices = ixonDevices.concat(ewonDevices);
+            sortDevices(sortedDevices);
             view.drawDevices(sortedDevices);
+
+            console.log("##########");
+            console.log(sortedDevices);
 
             $(".deviceSpinner").hide();
             $("#deviceListDiv").removeClass("d-none");
@@ -171,6 +174,33 @@ function init(){
         .catch((e) => {
             console.error(e);
         });
+}
+
+function mergeErrorData(ixonDevices, errorList){
+    // merge mySqlErrors with ixonDevices
+    // copy relevant data from errorList to a dict for more efficient look up.
+    const deviceErrors = {}
+    
+    for (const row of errorList){
+        const aId = row.agentId;
+
+        if (!(aId in deviceErrors)){
+            deviceErrors[aId] = 0;   
+        }
+
+        // accumulate errors of all devices to its agentId
+        deviceErrors[aId] += row.numberOfErrors;   
+    }
+
+    for (const i in ixonDevices){
+        const agentId = ixonDevices[i]["id"];
+
+        if (!(agentId in deviceErrors)) {
+            continue;
+        }
+
+        ixonDevices[i]["recentErrors"] = deviceErrors[agentId];
+    }
 }
 
 // sort devices by online status and lexicographical order
@@ -228,6 +258,4 @@ function sortDevices(devices){
     // sort the online and offline devices separately by lexicographical order.
     quickSort(devices, 0, pivot - 1);
     quickSort(devices, pivot, devices.length - 1);
-    
-    return devices;
 }
