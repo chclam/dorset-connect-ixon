@@ -49,6 +49,29 @@ $(document).ready(function() {
         }
     })
 
+    $("#errors").click(function(){
+        sortOnErrors(sortedDevices);
+        view.drawDevices(sortedDevices);     
+    });
+
+    $("#alpha").click(function(){
+        sortDevices(sortedDevices);
+        view.drawDevices(sortedDevices);     
+    });
+
+    $("#sort-devices").change(function(){
+
+        if($("#sort-devices option:selected").val() === "errors"){
+            sortOnErrors(sortedDevices);
+            $("#sortOptionDiv").addClass("text-primary font-weight-bold");
+        } else {
+            sortDevices(sortedDevices);
+            $("#sortOptionDiv").removeClass("text-primary font-weight-bold");
+        }
+        view.drawDevices(sortedDevices);
+        view.filterDevices(sortedDevices);
+    });
+
     $("#filter-status").change(function(){
         view.filterDevices(sortedDevices);
 

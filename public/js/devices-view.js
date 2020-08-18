@@ -1,42 +1,48 @@
 // append devices to div: deviceList.
 export function drawDevices(devices){
+    $(".deviceList").empty();
 
     for (let i = 0; i < devices.length; i++){
         // device object must contain: {string name, String id, String routerType, bool isOnline, list links}
-        const routerType = devices[i].routerType.charAt(0).toUpperCase() + devices[i].routerType.slice(1);
+        const routerType = devices[i].routerType;
         const deviceDiv = $(
-            `<a class="device p-0 list-group-item list-group-item-action flex-column align-items-start ${devices[i].routerType}" id="${devices[i].id}">
+            `<a class="device py-3 list-group-item list-group-item-action ${devices[i].routerType}" id="${devices[i].id}">
                 <div class="d-flex w-100 justify-content-between align-items-center"> 
-                    <h6 class="font-weight-normal deviceName m-3">${formatDeviceStatusBall(devices[i].isOnline)} ${devices[i].name} <small class="m-1 text-muted">${routerType} </small></h6>
+                    <div class="d-flex flex-row align-items-center"> 
+                        <div class="mr-3">${formatDeviceStatusBall(devices[i].isOnline)}</div>
+                        <div class="d-sm-inline-flex justify-content-start flex-column"> 
+                            <h6 class="font-weight-normal deviceName m-0"> ${devices[i].name}</h6>
+                            <div class="d-flex mx-0"><small class="text-muted text-capitalize">${devices[i].routerType} </small></div>
+                        </div> 
+                    </div>
                 ${drawErrorBadge(devices[i].recentErrors)}
                 </div>
             </a>`
             );
-
+//
         $(".deviceList").append(deviceDiv);
     }
 }
 
-function drawErrorBadge(recentErrors=undefined){
+function drawErrorBadge(recentErrors=null){
     // takes as input the device object
-    if (recentErrors === undefined) {
-        return "<p class='routerType text-muted m-2 mr-4'>-</p>";
+    if (recentErrors === null) {
+        return `<span class="badge badge-pill badge-light mr-2">-</span>`;
     }
     
-    let badgeColor = "badge-light";
+    let badgeColor = "badge-primary";
 
-    if (recentErrors > 10){
-        badgeColor = "badge-danger";
-    }
-    else if (5 < recentErrors && recentErrors < 10) {
+    if (10 < recentErrors && recentErrors < 15) {
         badgeColor = "badge-warning";
     }
-    
-    return `<span class="badge badge-pill ${badgeColor} m-2 mr-4">${recentErrors}</span>`;
+    else if (recentErrors >= 15){
+        badgeColor = "badge-danger";
+    }   
+    return `<span class="badge badge-pill ${badgeColor} mr-2">${recentErrors}</span>`;
 }
 
 function formatDeviceStatusBall(isOnline){
-    return `<b class='bullet ${isOnline ? "online" : "offline"} mr-2'>&#9679</b>`;
+    return `<span class="material-icons md-18 ${isOnline ? 'text-success' : 'text-light'}">fiber_manual_record</span>`;
  }
 
 export function drawUserSession(username, email, permissions){

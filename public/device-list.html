@@ -73,7 +73,7 @@
             </div>
           </div>
           <!-- Devices section -->
-          <div class="devices row mb-2 text-center">
+          <div class="devices row mb-4 text-center">
             <div class="col-lg-12">
               <div class="deviceSpinner spinner-border text-muted" role="status">
                   <span class="sr-only">Loading...</span>
@@ -85,7 +85,14 @@
                       <i class="material-icons md-18 mr-1">filter_list</i>Filters
                     </button>
                     <div class="justify-content-right select animated fadeInDown fastest d-none">
-                      <div id="statusFilterDiv" class="d-flex flex-row align-items-baseline justify-content-baseline mr-3 animated">
+                       <div id="sortOptionDiv" class="d-flex flex-row align-items-baseline justify-content-baseline mr-3 animated">
+                        <h6 class="d-flex flex-row font-weight-normal mr-2">Sorteer:</h6>
+                        <select id="sort-devices" class="custom-select custom-select-sm">
+                          <option value="alpha" selected>Alfabetisch</option>
+                          <option value="errors">Op Storingen</option>
+                        </select>
+                      </div>
+                       <div id="statusFilterDiv" class="d-flex flex-row align-items-baseline justify-content-baseline mr-3 animated">
                         <h6 class="d-flex flex-row font-weight-normal mr-2">Beschikbaarheid:</h6>
                         <select id="filter-status" class="custom-select custom-select-sm">
                           <option value="" selected>Alle</option>
