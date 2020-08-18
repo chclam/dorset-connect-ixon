@@ -3,11 +3,12 @@ export function drawDevices(devices){
 
     for (let i = 0; i < devices.length; i++){
         // device object must contain: {string name, String id, String routerType, bool isOnline, list links}
+        const routerType = devices[i].routerType.charAt(0).toUpperCase() + devices[i].routerType.slice(1);
         const deviceDiv = $(
             `<a class="device p-0 list-group-item list-group-item-action flex-column align-items-start ${devices[i].routerType}" id="${devices[i].id}">
                 <div class="d-flex w-100 justify-content-between align-items-center"> 
-                    <h6 class="font-weight-normal deviceName m-3">${formatDeviceStatusBall(devices[i].isOnline)} ${devices[i].name}</h6>
-                    <small class="routerType mr-4">${devices[i].routerType} | ${"recentErrors" in devices[i] ? devices[i].recentErrors : "-"}</small>
+                    <h6 class="font-weight-normal deviceName m-3">${formatDeviceStatusBall(devices[i].isOnline)} ${devices[i].name} <small class="m-1 text-muted">${routerType} </small></h6>
+                ${drawErrorBadge(devices[i].recentErrors)}
                 </div>
             </a>`
             );
@@ -16,9 +17,27 @@ export function drawDevices(devices){
     }
 }
 
+function drawErrorBadge(recentErrors=undefined){
+    // takes as input the device object
+    if (recentErrors === undefined) {
+        return "<p class='routerType text-muted m-2 mr-4'>-</p>";
+    }
+    
+    let badgeColor = "badge-light";
+
+    if (recentErrors > 10){
+        badgeColor = "badge-danger";
+    }
+    else if (5 < recentErrors && recentErrors < 10) {
+        badgeColor = "badge-warning";
+    }
+    
+    return `<span class="badge badge-pill ${badgeColor} m-2 mr-4">${recentErrors}</span>`;
+}
+
 function formatDeviceStatusBall(isOnline){
     return `<b class='bullet ${isOnline ? "online" : "offline"} mr-2'>&#9679</b>`;
-}
+ }
 
 export function drawUserSession(username, email, permissions){
     const userType = (permissions.agents_access_all ? "Toegang tot Ewon en Ixon" : "Reguliere Gebruiker");

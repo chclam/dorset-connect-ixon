@@ -1,0 +1,19 @@
+{
+	"ixon": {
+		"url": "",
+		"applicationId": "",
+		"companyId": ""
+	},
+	"ewon": {
+		"developerId": "",
+		"account": "",
+		"username": "",
+		"password": "" 
+	},
+  "mysql": {
+    "host": "",
+    "port": "",
+    "user": "",
+    "password": "",
+    "database": ""
+}
