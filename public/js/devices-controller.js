@@ -155,18 +155,18 @@ function init(){
     Promise.all([ixonPromise, ewonPromise, mySqlPromise])
         .then(([ixonDevices, ewonDevices, mySqlErrors]) => {
 
-            console.log(mySqlErrors);
             // if both are not loaded.
-            if (ixonDevices.length === 0 && ewonDevices.length === 0) throw "no session retrieved";          
-            mergeErrorData(ixonDevices, mySqlErrors);
+            if (ixonDevices.length === 0 && ewonDevices.length === 0){
+                throw "no session retrieved";
+            } 
 
             // sort devices by online status and lexicographical order.
             sortedDevices = ixonDevices.concat(ewonDevices);
+
+            mergeErrorData(sortedDevices, mySqlErrors);
+
             sortDevices(sortedDevices);
             view.drawDevices(sortedDevices);
-
-            console.log("##########");
-            console.log(sortedDevices);
 
             $(".deviceSpinner").hide();
             $("#deviceListDiv").removeClass("d-none");
@@ -176,7 +176,7 @@ function init(){
         });
 }
 
-function mergeErrorData(ixonDevices, errorList){
+function mergeErrorData(devices, errorList){
     // merge mySqlErrors with ixonDevices
     // copy relevant data from errorList to a dict for more efficient look up.
     const deviceErrors = {}
@@ -192,15 +192,53 @@ function mergeErrorData(ixonDevices, errorList){
         deviceErrors[aId] += row.numberOfErrors;   
     }
 
-    for (const i in ixonDevices){
-        const agentId = ixonDevices[i]["id"];
+    for (const i in devices){
+        const agentId = devices[i]["id"];
 
         if (!(agentId in deviceErrors)) {
+            devices[i]["recentErrors"] = null;
             continue;
         }
-
-        ixonDevices[i]["recentErrors"] = deviceErrors[agentId];
+        devices[i]["recentErrors"] = deviceErrors[agentId];
     }
+}
+
+// TO DO: IMPLEMENT A BETTER SORTING ALGORITHM.
+// simple bubble sort 
+function sortOnErrors(devices){
+
+    function quickSort(devices, low, high) {
+        // var low and high refer to the range that needs to be sorted.
+        function partition(devices, low, high){
+            const pivot = devices[high];
+            let i = low;
+
+            for (let j = low; j < high; j++){
+                const x = devices[i];
+
+                const p1 = devices[j].recentErrors > pivot.recentErrors;
+                const p2 = (devices[j].recentErrors === 0 && pivot.recentErrors === null)
+
+                if (p1 || p2) {
+                    devices[i] = devices[j];
+                    devices[j] = x;
+                    i++;
+                }
+            }
+            let temp = devices[i];
+            devices[i] = devices[high];
+            devices[high] = temp;
+            return i;
+        }
+
+        if (low < high){
+            const p = partition(devices, low, high);
+            quickSort(devices, low, p - 1);
+            quickSort(devices, p + 1, high);
+        }
+    }
+ 
+    quickSort(devices, 0, devices.length - 1);
 }
 
 // sort devices by online status and lexicographical order
