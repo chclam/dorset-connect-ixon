@@ -1,9 +1,19 @@
 export function signInDevice(message=null){
-	// if ($(`.devices-request-statuses`).children().length > 0) return;
 	if(message === null) message = `Aanmelding mislukt. Probeer het nogmaals.`;
 
 	const alertObject = getAlertObject(message, true);
 	$(`.devices-request-statuses`).append(alertObject);
+}
+
+export function numberErrorsRequest(e){
+	if (e.status === 401){
+		const alertObject = getAlertObject("Meld u aan voor toegang tot de storingsinformatie.", true);
+		$(".devices-request-statuses").append(alertObject);
+	}
+ 	if (e.status === 502){
+		const alertObject = getAlertObject("Verzoek tot storingsinformatie mislukt. Probeer uw pagina te verversen.", true);
+		$(".devices-request-statuses").append(alertObject);
+	}
 }
 
 export function ewonRequest(e){
@@ -15,7 +25,11 @@ export function ewonRequest(e){
 
 export function ixonRequest(e){
 	if (e.status === 401){
-		const alertObject = getAlertObject("Verzoek naar Ixon mislukt. Ongeldige Ixon sessie.", true);
+		const alertObject = getAlertObject("Verzoek naar Ixon mislukt; uw sessie bij Ixon is verlopen.", true);
+		$(".devices-request-statuses").append(alertObject);
+	}
+	if (e.status === 502){
+		const alertObject = getAlertObject("Er is iets mis met de server bij Ixon. Probeer het later nogmaals.", true);
 		$(".devices-request-statuses").append(alertObject);
 	}
 }

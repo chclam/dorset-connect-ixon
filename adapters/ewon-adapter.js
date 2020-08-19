@@ -50,6 +50,7 @@ async function getDevices(sessionKey){
         return formatDevices(jsonResponse.ewons);
     }
     catch(e) {
+        console.log(e);
         throw "ewon device request failed";
     }
 }

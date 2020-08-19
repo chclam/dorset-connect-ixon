@@ -20,25 +20,29 @@ function setSessionCookies(res, sessionKey, adapterName, expiresIn){
     return res;
 }
 
-
 /****************
  * Sign in routes 
 ****************/
 
 router.get("/", async (req, res) => {
-    const iSession = req.cookies["ixon-session"];
-    const validSession = await ixon.isValidSession(iSession);
-
-    if (validSession){
-        res.redirect("/devices");
-    } else {
-        res.status(200).sendFile(path.join(srcPath, "/signin.html"));
+    try {
+        const iSession = req.cookies["ixon-session"];
+        const validSession = await ixon.isValidSession(iSession);
+    
+        if (validSession){
+            res.redirect("/devices");
+        } 
+        else {
+            res.status(200).sendFile(path.join(srcPath, "/signin.html"));
+        }
+    }
+    catch(e) { 
+        console.error(e);
+        res.status(502).sendFile(path.join(srcPath, "/signin.html"));
     }
 });
 
 router.post("/signin/ixon", async (req, res) => {
-    const ixon = require("./adapters/ixon-adapter");
-    const ewon = require("./adapters/ewon-adapter");
     const username = req.body.username;
     const password = req.body.password;
     const twoFactorAuthentication = req.body.twoFactorAuthentication;
@@ -52,6 +56,7 @@ router.post("/signin/ixon", async (req, res) => {
         ixonPermissions = await ixon.getPermissions(ixonSession);
     }
     catch (e){
+        console.log(e);
         res.status(401).redirect("/?signin=failed");
     }
 
@@ -60,8 +65,8 @@ router.post("/signin/ixon", async (req, res) => {
         if (ixonPermissions.agents_access_all){
             const ewonSession = await getAdapterSession(config.ewon.username, config.ewon.password, ewon, 60);
             res = setSessionCookies(res, ewonSession, ewon.getAdapterName(), expiresIn);
-            res.redirect("/devices");
         }
+        res.redirect("/devices");
     }
     catch (e){
         const params = "?ewonsignin=failed,invalidCompany";
@@ -79,13 +84,14 @@ router.get("/signout", async (req, res) => {
 
         Promise.all([ixonPromise, ewonPromise])
             .then(() => {
-                res.redirect("/");
+                res.status(200).redirect("/");
             })
             .catch((error) => {
-                res.redirect("/devices");
+                res.status(502).redirect("/");
             });
     }
     catch (e) {
+        res.status(502).redirect("/");
         console.log(e);
     }
 });
@@ -96,13 +102,19 @@ router.get("/signout", async (req, res) => {
 ****************/
 
 router.get("/devices", async (req, res) => {
-    const iSession = req.cookies["ixon-session"];
-    const validSession = await ixon.isValidSession(iSession);
-
-    if (validSession){
-        res.status(200).sendFile(path.join(srcPath, "/device-list.html"));
-    } else {
-        res.redirect("/");
+    try {
+        const iSession = req.cookies["ixon-session"];
+        const validSession = await ixon.isValidSession(iSession);
+    
+        if (validSession){
+            res.status(200).sendFile(path.join(srcPath, "/device-list.html"));
+        } else {
+            res.redirect("/");
+        }
+    }
+    catch(e) {
+        console.error(e);
+        res.status(401).redirect("/?signin=failed");
     }
 });
 
@@ -119,7 +131,8 @@ router.get("/devices/ixon", async (req, res) => {
         res.status(200).json({"status": "success", "data": formattedDevices});
     }
     catch (e){
-        res.status(401).send("Failed to fetch ixon devices.");
+        console.error(e);
+        res.status(502).send("Failed to fetch ixon devices.");
     }
 });
 
@@ -131,26 +144,32 @@ router.get("/devices/ixon/user", async (req, res) => {
         res.status(200).json({"status": "success", "data": userData});
     }
     catch (e){
-        res.status(404).send(e);
+        res.status(502).send(e);
     }
 });
 
 router.get("/devices/ixon/recentErrors", async (req, res) => {
-    // add ixon verification. i.e. access to sql iff access via ixon.
-    const ixonSession = req.cookies["ixon-session"];
-    const validSession = await ixon.isValidSession(ixonSession);
-
-    if (!validSession){
-        res.status(401).send("Unauthorized ");
+    try {
+        // add ixon verification. i.e. access to sql iff access via ixon.
+        const ixonSession = req.cookies["ixon-session"];
+        const validSession = await ixon.isValidSession(ixonSession);
+    
+        if (!validSession){
+            res.status(401).send("Session unauthorized");
+        }
+    
+        const credentials = config.mysql;
+        const con = mysql.createConnection(credentials);
+        const query = "SELECT * FROM recenterrors";
+       
+        con.query(query, (error, results) => {
+            res.status(200).send({"status": "success", "data": results});
+        });
     }
-
-    const credentials = config.mysql;
-    const con = mysql.createConnection(credentials);
-    const query = "SELECT * FROM recenterrors";
-   
-    con.query(query, (error, results) => {
-        res.status(200).send({"status": "success", "data": results});
-    });
+    catch (e) {
+        console.log(e);
+        res.status(502).send({"status": "failed", "data": []});
+    }
 });
 
 router.get("/devices/ewon", async (req, res) => {

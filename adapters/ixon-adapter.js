@@ -344,8 +344,20 @@ function updateLinkList(linkList){
     }
 }
 
+let initialCallSuccess = false;
 
-// Initial call to get link list after server start.
-getLinkList();
+while(!initialCallSuccess){
+    // Initial call to get link list after server start.
+    try {
+        console.log("Connecting to Ixon server...");
+        getLinkList();
+        initialCallSuccess = true;   
+    }
+    catch (e) {
+        console.log("Initial server call to Ixon failed. There might be something wrong with the Ixon server.", e);
+        console.log("Retrying...");
+    }
+}
+
 
 module.exports = {getLinkList, getSession, getDevices, deleteSession, isValidSession, getAdapterName, getPermissions, getUserData, appendHttpServers, formatDevices};

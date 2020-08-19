@@ -169,8 +169,7 @@ function init(){
         })
         .catch(e => {
             // IMPORTANTTTTT
-            // errorHandler.ixonErrorList(e);
-            console.error(e);
+            errorHandler.numberErrorsRequest(e);
             return Promise.resolve([]);
         });
 
@@ -202,6 +201,9 @@ function init(){
 function mergeErrorData(devices, errorList){
     // merge mySqlErrors with ixonDevices
     // copy relevant data from errorList to a dict for more efficient look up.
+
+    if (errorList.length === 0) return devices;
+
     const deviceErrors = {}
     
     for (const row of errorList){
@@ -230,7 +232,6 @@ function quickSort(devices, low, high, sortOn="alphabetical") {
     // var low and high refer to the range that needs to be sorted.
 
     // guard predicates for sort options
-
     const sortPreds = {
         "alphabetical": (device, pivot) => device.name < pivot.name,
         "errors": (device, pivot) => (device.recentErrors === 0 && pivot.recentErrors === null) || (device.recentErrors > pivot.recentErrors)
@@ -271,8 +272,8 @@ function quickSort(devices, low, high, sortOn="alphabetical") {
     quickSort(devices, 0, devices.length - 1, "errors");
 }
 
-// sort devices by online status and lexicographical order
 function sortDevices(devices){
+    // sort devices by online status and lexicographical order
     // "partition" the devices by online status.
     function partitionOnline(devices){
         let pivot = 0; // divider between on- and offline devices.
