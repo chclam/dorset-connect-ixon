@@ -9,7 +9,7 @@ export function drawDevices(devices){
             `<a class="device py-3 list-group-item list-group-item-action ${devices[i].routerType}" id="${devices[i].id}">
                 <div class="d-flex w-100 justify-content-between align-items-center"> 
                     <div class="d-flex flex-row align-items-center"> 
-                        <div class="mr-3">${formatDeviceStatusBall(devices[i].isOnline)}</div>
+                        <div class="mr-4">${formatDeviceStatusBall(devices[i].isOnline)}</div>
                         <div class="d-sm-inline-flex justify-content-start flex-column"> 
                             <h6 class="font-weight-normal deviceName m-0"> ${devices[i].name}</h6>
                             <div class="d-flex mx-0"><small class="text-muted text-capitalize">${devices[i].routerType} </small></div>
@@ -42,7 +42,7 @@ function drawErrorBadge(recentErrors=null){
 }
 
 function formatDeviceStatusBall(isOnline){
-    return `<span class="material-icons md-18 ${isOnline ? 'text-success' : 'text-light'}">fiber_manual_record</span>`;
+    return `<span class="material-icons md-18 ${isOnline ? 'text-success' : 'text-light'}">stop_circle</span>`;
  }
 
 export function drawUserSession(username, email, permissions){

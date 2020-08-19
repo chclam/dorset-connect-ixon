@@ -226,42 +226,49 @@ function mergeErrorData(devices, errorList){
     }
 }
 
-// TO DO: IMPLEMENT A BETTER SORTING ALGORITHM.
-// simple bubble sort 
-function sortOnErrors(devices){
+function quickSort(devices, low, high, sortOn="alphabetical") {
+    // var low and high refer to the range that needs to be sorted.
 
-    function quickSort(devices, low, high) {
-        // var low and high refer to the range that needs to be sorted.
-        function partition(devices, low, high){
-            const pivot = devices[high];
-            let i = low;
+    // guard predicates for sort options
 
-            for (let j = low; j < high; j++){
-                const x = devices[i];
-
-                const p1 = devices[j].recentErrors > pivot.recentErrors;
-                const p2 = (devices[j].recentErrors === 0 && pivot.recentErrors === null)
-
-                if (p1 || p2) {
-                    devices[i] = devices[j];
-                    devices[j] = x;
-                    i++;
-                }
-            }
-            let temp = devices[i];
-            devices[i] = devices[high];
-            devices[high] = temp;
-            return i;
-        }
-
-        if (low < high){
-            const p = partition(devices, low, high);
-            quickSort(devices, low, p - 1);
-            quickSort(devices, p + 1, high);
-        }
+    const sortPreds = {
+        "alphabetical": (device, pivot) => device.name < pivot.name,
+        "errors": (device, pivot) => (device.recentErrors === 0 && pivot.recentErrors === null) || (device.recentErrors > pivot.recentErrors)
     }
- 
-    quickSort(devices, 0, devices.length - 1);
+
+    if (!(sortOn in sortPreds)) {
+        throw ("Provided sort option not available.");
+    }
+
+    function partition(devices, low, high){
+        const pivot = devices[high];
+        let i = low;
+
+        for (let j = low; j < high; j++){
+            const x = devices[i];
+            const sortPred = sortPreds[sortOn];
+
+            if (sortPred(devices[j], pivot)) {
+                devices[i] = devices[j];
+                devices[j] = x;
+                i++;
+            }
+        }
+        let temp = devices[i];
+        devices[i] = devices[high];
+        devices[high] = temp;
+        return i;
+    }
+
+    if (low < high){
+        const p = partition(devices, low, high);
+        quickSort(devices, low, p - 1, sortOn);
+        quickSort(devices, p + 1, high, sortOn);
+    }
+}
+
+ function sortOnErrors(devices){
+    quickSort(devices, 0, devices.length - 1, "errors");
 }
 
 // sort devices by online status and lexicographical order
@@ -284,35 +291,6 @@ function sortDevices(devices){
         }
         // returns deviceList and the index that divides on- and offline.
         return pivot;
-    }
-
-    function quickSort(devices, low, high){
-
-        // var low and high refer to the range that needs to be sorted.
-        function partition(devices, low, high){
-            let pivot = devices[high];
-            let i = low;
-
-            for (let j = low; j < high; j++){
-                const x = devices[i];
-
-                if (devices[j].name < pivot.name){
-                    devices[i] = devices[j];
-                    devices[j] = x;
-                    i++;
-                }
-            }
-            let temp = devices[i];
-            devices[i] = devices[high];
-            devices[high] = temp;
-            return i;
-        }
-
-        if (low < high){
-            let p = partition(devices, low, high);
-            quickSort(devices, low, p - 1);
-            quickSort(devices, p + 1, high);
-        }
     }
  
     const pivot = partitionOnline(devices);

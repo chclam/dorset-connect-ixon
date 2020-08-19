@@ -230,8 +230,6 @@ function formatDevices(deviceData){
             for (const server of ixon.servers){
                 let url = null;
 
-                if (ixon.name === "Service Ixon Zuid Amerika") console.log(ixon, device.isOnline);
-
                 if (device.isOnline){
                     if (server.type === "http" && ("link" in server)){
                         url = server.link;
