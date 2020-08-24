@@ -49,48 +49,45 @@ $(document).ready(function() {
         }
     })
 
-    $("#errors").click(function(){
-        sortOnErrors(sortedDevices);
-        view.drawDevices(sortedDevices);     
-    });
+    $("#sortOptionDiv .optionCombobox").change(function(){
 
-    $("#alpha").click(function(){
-        sortDevices(sortedDevices);
-        view.drawDevices(sortedDevices);     
-    });
-
-    $("#sort-devices").change(function(){
-
-        if($("#sort-devices option:selected").val() === "errors"){
+        if($("#sortOptionDiv option:selected").val() === "errors"){
             sortOnErrors(sortedDevices);
-            $("#sortOptionDiv").addClass("text-primary font-weight-bold");
         } else {
             sortDevices(sortedDevices);
-            $("#sortOptionDiv").removeClass("text-primary font-weight-bold");
         }
+
         view.drawDevices(sortedDevices);
         view.filterDevices(sortedDevices);
     });
 
-    $("#filter-status").change(function(){
-        view.filterDevices(sortedDevices);
-
-        if($("#filter-status option:selected").val() === ""){
-            $("#statusFilterDiv").removeClass("text-primary font-weight-bold");
+    function highlightFilter(filterDiv){
+        if($(`${filterDiv} option:selected`).val() === ""){
+            $(`${filterDiv} .bullet`).addClass("invisible faster fadeIn animated");
+            $(`${filterDiv}`).removeClass("loaded");
+            $(`${filterDiv} .optionCombobox`).removeClass("loaded");
         } else {
-            $("#statusFilterDiv").addClass("text-primary font-weight-bold");
+            $(`${filterDiv} .bullet`).removeClass("invisible faster fadeIn animated");
+            $(`${filterDiv}`).addClass("loaded");
+            $(`${filterDiv} .optionCombobox`).addClass("loaded");
         }
+   }
+
+    $("#statusFilterDiv .optionCombobox").change(function(){
+        view.filterDevices(sortedDevices);
+        highlightFilter("#statusFilterDiv");
     });
 
-    $("#filter-device").change(function(){
+    $("#routerFilterDiv .optionCombobox").change(function(){
         view.filterDevices(sortedDevices);
-
-        if($("#filter-device option:selected").val() === ""){
-            $("#routerFilterDiv").removeClass("text-primary font-weight-bold");
-        } else {
-            $("#routerFilterDiv").addClass("text-primary font-weight-bold");
-        }
+        highlightFilter("#routerFilterDiv");
     });
+
+    $("#statusFilterDiv .optionCombobox").change(function(){
+        view.filterDevices(sortedDevices);
+        highlightFilter("#statusFilterDiv");
+    });
+
 
     // modal for device details.
     $(document).on("click", ".device", function() {
@@ -168,7 +165,6 @@ function init(){
             return Promise.resolve(devices);
         })
         .catch(e => {
-            // IMPORTANTTTTT
             errorHandler.numberErrorsRequest(e);
             return Promise.resolve([]);
         });
@@ -202,7 +198,7 @@ function mergeErrorData(devices, errorList){
     // merge mySqlErrors with ixonDevices
     // copy relevant data from errorList to a dict for more efficient look up.
 
-    if (errorList.length === 0) return devices;
+    if (errorList.length === 0) return;
 
     const deviceErrors = {}
     

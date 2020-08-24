@@ -32,17 +32,17 @@ function drawErrorBadge(recentErrors=null){
     
     let badgeColor = "badge-primary";
 
-    if (10 < recentErrors && recentErrors < 15) {
+    if (5 <= recentErrors && recentErrors < 10) {
         badgeColor = "badge-warning";
     }
-    else if (recentErrors >= 15){
+    else if (recentErrors >= 10){
         badgeColor = "badge-danger";
     }   
     return `<span class="badge badge-pill ${badgeColor} mr-2">${recentErrors}</span>`;
 }
 
 function formatDeviceStatusBall(isOnline){
-    return `<span class="material-icons md-18 ${isOnline ? 'text-success' : 'text-light'}">stop_circle</span>`;
+    return `<span class="material-icons md-16 ${isOnline ? 'text-success' : 'text-light'}">stop_circle</span>`;
  }
 
 export function drawUserSession(username, email, permissions){
@@ -134,11 +134,11 @@ export function filterDevices(devices){
     }
 
     // filter on device selector (all, ixon, ewon)
-    let deviceFilter = $("#filter-device option:selected").val();
+    let deviceFilter = $("#routerFilterDiv .optionCombobox option:selected").val();
     if (deviceFilter.length > 0) deviceFilter = `.${deviceFilter}`;
 
     // filter on status (all, online, offline)
-    let filterStatus = $("#filter-status option:selected").val();
+    let filterStatus = $("#statusFilterDiv .optionCombobox option:selected").val();
     let filterSetOnline = null;
     if (filterStatus === "online"){
         filterSetOnline = true;

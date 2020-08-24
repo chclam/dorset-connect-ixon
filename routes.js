@@ -9,12 +9,17 @@ const ewon = require("./adapters/ewon-adapter");
 const mysql = require("mysql")
 
 async function getAdapterSession(username, password, adapter, expiresIn, twoFactorAuthentication){
-    if(adapter.getAdapterName() === "ixon" && twoFactorAuthentication.length > 0){
-        return await adapter.getSession(username, password, expiresIn, twoFactorAuthentication=twoFactorAuthentication);
+    try {
+        if (adapter.getAdapterName() === "ixon" && twoFactorAuthentication.length > 0){
+            return await adapter.getSession(username, password, expiresIn, twoFactorAuthentication=twoFactorAuthentication);
+        }
+        return await adapter.getSession(username, password, expiresIn);
     }
-    return await adapter.getSession(username, password, expiresIn);
+    catch (e) {
+        throw e;
+    }
 }
-
+   
 function setSessionCookies(res, sessionKey, adapterName, expiresIn){
     res.cookie(`${adapterName}-session`, sessionKey, {maxAge: expiresIn * 10000}); // expiresin to milliseconds
     return res;
@@ -70,7 +75,7 @@ router.post("/signin/ixon", async (req, res) => {
     }
     catch (e){
         const params = "?ewonsignin=failed,invalidCompany";
-        res.redirect("/devices" + params);
+        res.status(502).redirect("/devices" + params);
     }
 });
 
@@ -159,11 +164,12 @@ router.get("/devices/ixon/recentErrors", async (req, res) => {
         }
     
         const credentials = config.mysql;
-        const con = mysql.createConnection(credentials);
+        const pool = mysql.createPool(credentials);
         const query = "SELECT * FROM recenterrors";
        
-        con.query(query, (error, results) => {
+        pool.query(query, (error, results) => {
             res.status(200).send({"status": "success", "data": results});
+            if (error) throw error;
         });
     }
     catch (e) {

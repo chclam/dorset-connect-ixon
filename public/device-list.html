@@ -82,36 +82,53 @@
                 <!-- Filter buttons -->
                   <div class="filters d-flex justify-content-between mb-2">
                     <button type="button" class="btn btn-link p-0 my-2 animated faster d-flex align-items-center text-muted">
-                      <i class="material-icons md-18 mr-1">filter_list</i>Filters
+                      <i class="material-icons md-16 mr-1">filter_list</i>Filters
                     </button>
                     <div class="justify-content-right select animated fadeInDown fastest d-none">
-                       <div id="sortOptionDiv" class="d-flex flex-row align-items-baseline justify-content-baseline mr-3 animated">
-                        <h6 class="d-flex flex-row font-weight-normal mr-2">Sorteer:</h6>
-                        <select id="sort-devices" class="custom-select custom-select-sm">
-                          <option value="alpha" selected>Alfabetisch</option>
-                          <option value="errors">Op Storingen</option>
-                        </select>
-                      </div>
-                       <div id="statusFilterDiv" class="d-flex flex-row align-items-baseline justify-content-baseline mr-3 animated">
-                        <h6 class="d-flex flex-row font-weight-normal mr-2">Beschikbaarheid:</h6>
-                        <select id="filter-status" class="custom-select custom-select-sm">
-                          <option value="" selected>Alle</option>
-                          <option value="online">Online</option>
-                          <option value="offline">Offline</option>
-                        </select>
-                      </div>
-                        <div id="routerFilterDiv" class="d-flex flex-row align-items-baseline justify-content-baseline mr-3 animated">
-                          <h6 class="font-weight-normal mr-2">Routertype:</h6>
-                          <select id="filter-device" class="custom-select custom-select-sm">
-                          <option value="" selected>Alle</option>
-                          <option value="ixon">Ixon</option>
-                          <option value="ewon">Ewon</option>
-                        </select>
-                      </div>
+
+                       <div id="sortOptionDiv" class="d-flex align-items-center justify-content-baseline mr-3 animated">
+                          <div class="d-flex align-items-center">
+                             <span class="bullet material-icons md-16 p-0 mr-2 invisible">
+                                fiber_manual_record
+                             </span>
+                             <h6 class="my-0 mr-2 text-nowrap">Sorteer op:</h6>
+                          </div>
+                          <select class="optionCombobox custom-select custom-select-sm z-depth-1">
+                            <option value="alpha" selected>A-Z</option>
+                            <option value="errors">Storingen</option>
+                          </select>
+                        </div>
+                       <div id="statusFilterDiv" class="d-flex align-items-center justify-content-baseline mr-3 animated">
+                          <div class="d-flex align-items-center">
+                             <span class="bullet material-icons md-16 p-0 mr-2 invisible">
+                                fiber_manual_record
+                             </span>
+                             <h6 class="my-0 mr-2">Status:</h6>
+                          </div>
+                          <select class="optionCombobox custom-select custom-select-sm z-depth-1">
+                            <option value="" selected>Alle</option>
+                            <option value="online">Online</option>
+                            <option value="offline">Offline</option>
+                          </select>
+                        </div>
+                       <div id="routerFilterDiv" class="d-flex align-items-center justify-content-baseline mr-3">
+                          <div class="d-flex align-items-center">
+                              <span class="bullet material-icons md-16 p-0 mr-2 invisible">
+                                fiber_manual_record
+                              </span>
+                              <h6 class="my-0 mr-2">Router:</h6>
+                          </div>
+                         <select class="optionCombobox custom-select custom-select-sm z-depth-1">
+                           <option value="" selected>Alle</option>
+                           <option value="ixon">Ixon</option>
+                           <option value="ewon">Ewon</option>
+                         </select>
+                        </div>
                     </div>
                   </div>
                 <!-- List of devices -->
-                <div class="deviceList list-group animated fadeInUp fast"></div>
+                <div class="deviceList list-group animated fadeInUp fast z-depth-1">
+                </div>
                 <div id="noDevices" class='d-none text-center mt-5 px-5 pt-3 pb-5'>
                           <i class="material-icons mb-2 md-36">
                               info

@@ -352,6 +352,7 @@ while(!initialCallSuccess){
         console.log("Connecting to Ixon server...");
         getLinkList();
         initialCallSuccess = true;   
+        console.log("Connection to the Ixon Api success.");
     }
     catch (e) {
         console.log("Initial server call to Ixon failed. There might be something wrong with the Ixon server.", e);
