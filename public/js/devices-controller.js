@@ -4,6 +4,8 @@ import * as view from "./devices-view.js";
 
 let sortedDevices;
 
+const isTest = false; // for recent error dummy test data 
+
 $(document).ready(function() {
 
     // device search bar listeners.
@@ -170,8 +172,11 @@ function init(){
         });
 
     // show on page as soon as either device type is loaded.
-    Promise.all([ixonPromise, ewonPromise, mySqlPromise])
-        .then(([ixonDevices, ewonDevices, mySqlErrors]) => {
+     Promise.all([ixonPromise, ewonPromise, mySqlPromise])
+         .then(([ixonDevices, ewonDevices, mySqlErrors]) => {
+
+    //Promise.all([ixonPromise, ewonPromise])
+    //    .then(([ixonDevices, ewonDevices]) => {
 
             // if both are not loaded.
             if (ixonDevices.length === 0 && ewonDevices.length === 0){
@@ -197,6 +202,13 @@ function init(){
 function mergeErrorData(devices, errorList){
     // merge mySqlErrors with ixonDevices
     // copy relevant data from errorList to a dict for more efficient look up.
+    // for demonstration purposes, fill errors with dummy data
+    if (isTest) {
+        for (let d=0; d < devices.length; d++){
+            devices[d].recentErrors = Math.floor(Math.random() * 11);
+        }
+        return;
+    }
 
     if (errorList.length === 0) return;
 

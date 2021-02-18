@@ -5,8 +5,8 @@ class Device {
 	    this.isOnline = isOnline;
 	    this.routerType = routerType;
 	    this.links = [];
-	    this.dataMonitors = [];
-			this.dataReports = [];
+// 	    this.dataMonitors = [];
+// 			this.dataReports = [];
 	}
 }
 

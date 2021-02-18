@@ -3,8 +3,6 @@ const SHA256 = require("crypto-js/sha256");
 const config = require("./adapter-config");
 const classes = require("./classes.js");
 
-const applicationId = config.ixon.applicationId;
-const companyId = config.ixon.companyId;
 
 const linkDict = {};
 let linkListChecksum;
@@ -13,19 +11,27 @@ function getAdapterName(){
     return "ixon";
 }
 
+function formatRequestData(uri=config.ixon.uri, method="GET", sessionKey="", form={}, body=null){
+    const requestData = {
+        uri: uri,
+        method: method,
+        headers: {
+            "Accept": "application/json",
+            "Api-Application": config.ixon.applicationId,
+            "Api-Version": "2",
+            "Api-Company": config.ixon.companyId,
+            "User-Agent": null
+        },
+        form: JSON.stringify(form)
+    };
+    if (sessionKey.length > 0) requestData["headers"]["Authorization"] = `Bearer ${sessionKey}`;
+    return requestData;
+}
+
 // initial request to ixon for linklist to the api.
 // returns rels for api requests in urls.  
 async function getLinkList() {
-    const requestData = {
-        uri: config.ixon.url,
-        method: "GET",
-        headers: {
-            "Accept": "application/json",
-            "IXapi-Application": applicationId,
-            "IXapi-Version": "1",
-            "User-Agent": null
-        }
-    };
+    const requestData = formatRequestData(config.ixon.url);
 
     //initial call to ixon for discovery link list. 
     try {
@@ -39,30 +45,26 @@ async function getLinkList() {
 }
 
 async function getPermissions(sessionKey=""){
-    href = linkDict["UserPermissions"];
-    href = href.replace("{publicId}", "me");
-
-    if (sessionKey.length === 0) {
-        throw "Sessionkey must not be empty";
-    }
+    if (sessionKey.length === 0) throw "Sessionkey is required.";
+    let href = linkDict["RoleList"];
+    href += "?fields=permissions";
+    const requestData = formatRequestData(href, "GET", sessionKey);
 
     try {
-        const requestData = {
-            uri: href,
-            method: "GET",
-            headers: {
-                "Accept": "application/json",
-                "IXapi-Application": applicationId,
-                "IXapi-Version": "1",
-                "User-Agent": null,
-                // company code for dorset
-                "IXapi-Company": companyId, 
-                "Authorization": `Bearer ${sessionKey}` 
+        let roleData = await requestPromise(requestData);
+        roleData = JSON.parse(roleData);
+        
+        // parse out permission data
+        const permissions = [];
+        for (let role of roleData["data"]){
+            for (let perm of role["permissions"]){
+                perm = perm["publicId"];
+                if (!permissions.includes(perm)){
+                    permissions.push(perm);
+                };
             }
-        };
-        let sessionData = await requestPromise(requestData);
-        sessionData = JSON.parse(sessionData);
-        return sessionData.data;
+        }
+        return permissions; 
     }
     catch(error) {
         console.log(error);
@@ -71,23 +73,13 @@ async function getPermissions(sessionKey=""){
 
 // expiresIn = in seconds.
 async function getSession(username, password, expiresIn, twoFactorAuthentication="") {
-    const requestData = {
-        uri: linkDict["AccessTokenList"] + "?fields=secretId,publicId",
-        method: "POST",
-        headers: {
-            "Accept": "application/json",
-            "IXapi-Application": applicationId,
-            "IXapi-Version": "1",
-            "User-Agent": null
-        },
-        form: {
-            "expiresIn": expiresIn
-        }
-    };
+    const href = linkDict["AccessTokenList"] + "?fields=secretId,publicId";
+    const requestData = formatRequestData(href, "POST", undefined, {"expiresIn": expiresIn});
+
     // Encode authentication string.
     let authenticationString = new Buffer.from(`${username}:${twoFactorAuthentication}:${password}`);
     authenticationString = authenticationString.toString("base64");
-    requestData.headers.Authorization = `Basic ${authenticationString}`;
+    requestData.headers["Authorization"] = `Basic ${authenticationString}`;
 
     try {
         let sessionData = await requestPromise(requestData);
@@ -96,7 +88,7 @@ async function getSession(username, password, expiresIn, twoFactorAuthentication
     }
     catch (e) {
         // log error in separate file.
-        throw "Sign in failed.";
+        throw `Sign in failed: ${e}`;
     }
 }
 
@@ -104,18 +96,7 @@ async function getUserData(sessionKey){
     let devicesUri = linkDict["User"];
     devicesUri = devicesUri.replace("{publicId}", "me");
     devicesUri += "?fields=emailAddress,fullName,language,permissions.*";
-    const requestData = {
-        uri: devicesUri,
-        method: "GET",
-        headers: {
-            "Accept": "application/json",
-            "IXapi-Application": applicationId,
-            "IXapi-Version": "1",
-            "Authorization": `Bearer ${sessionKey}`,
-            "IXapi-Company": companyId, 
-            "User-Agent": null
-        }
-    };
+    const requestData = formatRequestData(devicesUri, "GET", sessionKey);
     
     try {
         let data = await requestPromise(requestData);
@@ -131,18 +112,7 @@ async function getUserData(sessionKey){
 async function getDevices(sessionKey){
     const params = "?fields=name,publicId,activeVpnSession,devices.*,servers.*,dataMonitors,dataReports";
     const devicesUri = linkDict["AgentList"] + params;
-    const requestData = {
-        uri: devicesUri,
-        method: "GET",
-        headers: {
-            "Accept": "application/json",
-            "IXapi-Application": applicationId,
-	        "IXapi-Company": companyId,
-            "IXapi-Version": "1",
-            "Authorization": `Bearer ${sessionKey}`,
-            "User-Agent": null
-        }
-    };
+    const requestData = formatRequestData(devicesUri, "GET", sessionKey);
     
     try {
         let jsonResponse = await requestPromise(requestData);
@@ -154,22 +124,57 @@ async function getDevices(sessionKey){
     }
 }
 
+async function deleteSession(sessionKey=""){
+
+    if (sessionKey.length === 0) return Promise.resolve("session key is undefined");
+
+    const devicesUri = linkDict["AccessTokenList"] + "/me";
+    const requestData = formatRequestData(devicesUri, "DELETE", sessionKey);
+    
+    try {
+       await requestPromise(requestData);
+       return Promise.resolve();
+    }
+    catch (e){
+        return Promise.reject(new Error("Session deletion failed for ixon."));
+    }
+}
+
+// makea  basic discovery request with sessionkey. If the sessionkey 
+// is expired it will receive an error from the server.
+async function isValidSession(sessionKey=""){
+
+    if (sessionKey.length === 0) return Promise.resolve(false);
+
+    const href = linkDict["MyUser"];
+    const requestData = formatRequestData(href, "GET", sessionKey);
+
+    //initial call to ixon for discovery link list. 
+    try {
+        await requestPromise(requestData);
+        return Promise.resolve(true);
+    }
+    catch (e) {
+        console.log(linkDict);
+        return Promise.resolve(false);
+    }
+}
+
 
 async function appendHttpServers(sessionKey, devices) {
-   
     const httpServers = [];
 
     for (let device of devices){
-        for (deviceServer of device["servers"]){
+        for (let deviceServer of device["servers"]){
             // if there are http servers and if the device is online
             if (deviceServer.type === "http" && device.activeVpnSession !== null){
-                x = {
+                const x = {
                     "server": {
                         "publicId": deviceServer.publicId
                     },
                     "method": "http"
                 }
-                httpServers.push(x)
+                httpServers.push(x);
             }
         }
     }
@@ -177,21 +182,8 @@ async function appendHttpServers(sessionKey, devices) {
     // Stop if there are no http servers to retrieve, i.e. no device is online
     if (httpServers.length === 0) return;
 
-    const requestData = {
-        uri: linkDict["WebAccessList"],
-        method: "POST",
-        headers: {
-            "Accept": "application/json",
-            "IXapi-Application": applicationId,
-            "IXapi-Company": companyId,
-            "Authorization": `Bearer ${sessionKey}`,
-            "IXapi-Version": "1",
-            "User-Agent": null
-        },
-        body: httpServers,
-        json: true
-    };
-
+    const uri = linkDict["WebAccessList"];
+    const requestData = formatRequestData(uri, "POST", sessionKey, undefined, httpServers);
 
     try {
         let sessionData = await requestPromise(requestData);
@@ -220,11 +212,7 @@ function formatDevices(deviceData){
     try {
         for (let ixon of deviceData){
             const device = new classes.Device(ixon.publicId, ixon.name, false, "ixon");
-            
-
-            if (ixon.activeVpnSession !== null) {
-                device.isOnline = true;
-            }
+            if (ixon.activeVpnSession !== null) device.isOnline = true;
 
             // set up links
             for (const server of ixon.servers){
@@ -235,7 +223,7 @@ function formatDevices(deviceData){
                         url = server.link;
                     }
                     else if (server.type === "vnc"){
-                        url = `https://connect.ixon.cloud/agents/${ixon.publicId}/Web-Access/VNC/${server.publicId}`;
+                        url = `https://portal.ixon.cloud/agents/${ixon.publicId}/Web-Access/VNC/${server.publicId}`;
                     }
                     url = encodeURI(url);
                 }
@@ -248,21 +236,21 @@ function formatDevices(deviceData){
                 device.links.push(linkObject);
             }
 
-            for (const monitor of ixon.dataMonitors){
-                const dataMonitor = {
-                    name: monitor.name,
-                    url: encodeURI(`https://connect.ixon.cloud/agents/${ixon.publicId}/data-monitors/${monitor.publicId}`)
-                }
-                device.dataMonitors.push(dataMonitor);
-            }
+//            for (const monitor of ixon.dataMonitors){
+//                const dataMonitor = {
+//                    name: monitor.name,
+//                    url: encodeURI(`https://portal.ixon.cloud/agents/${ixon.publicId}/data-monitors/${monitor.publicId}`)
+//                }
+//                device.dataMonitors.push(dataMonitor);
+//            }
 
-            for (const report of ixon.dataReports){
-                const dataReport = {
-                    name: report.name,
-                    url: encodeURI(`https://connect.ixon.cloud/agents/${ixon.publicId}/data-reports/${report.publicId}`)
-                }
-                device.dataReports.push(dataReport);
-            }
+//            for (const report of ixon.dataReports){
+//                const dataReport = {
+//                    name: report.name,
+//                    url: encodeURI(`https://portal.ixon.cloud/agents/${ixon.publicId}/data-reports/${report.publicId}`)
+//                }
+//                device.dataReports.push(dataReport);
+//            }
             ixons.push(device);
         }
         return ixons;
@@ -274,58 +262,6 @@ function formatDevices(deviceData){
     }
 }
 
-async function deleteSession(sessionKey=""){
-
-    if (sessionKey.length === 0) return Promise.resolve("session key is undefined");
-
-    const devicesUri = linkDict["AccessTokenList"] + "/me";
-    const requestData = {
-        uri: devicesUri,
-        method: "DELETE",
-        headers: {
-            "IXapi-Application": applicationId,
-            "IXapi-Version": "1",
-            "Authorization": `Bearer ${sessionKey}`,
-            "User-Agent": null
-        }
-    };
-    
-    try {
-       await requestPromise(requestData);
-       return Promise.resolve();
-    }
-    catch (e){
-        return Promise.reject(new Error("Session deletion failed for ixon."));
-    }
-}
-
-// makea  basic discovery request with sessionkey. If the sessionkey 
-// is expired it will receive an error from the server.
-async function isValidSession(sessionKey=""){
-
-    if (sessionKey.length === 0) return Promise.resolve(false);
-
-    const requestData = {
-        uri: "https://api.ixon.net:443/",
-        method: "GET",
-        headers: {
-            "Accept": "application/json",
-            "IXapi-Application": applicationId,
-            "IXapi-Version": "1",
-            "Authorization": `Bearer ${sessionKey}`,
-            "User-Agent": null
-        }
-    };
-
-    //initial call to ixon for discovery link list. 
-    try {
-        await requestPromise(requestData);
-        return Promise.resolve(true);
-    }
-    catch (e) {
-        return Promise.resolve(false);
-    }
-}
 
 function updateLinkList(linkList){
     const responseListHashed = SHA256(linkList);
@@ -339,7 +275,7 @@ function updateLinkList(linkList){
     Object.keys(linkDict).forEach((id) => {
         delete linkDict[id];
     });
-    for (let row of jsonData.links){
+    for (let row of jsonData.data){
         linkDict[`${row.rel}`] = row.href;
     }
 }

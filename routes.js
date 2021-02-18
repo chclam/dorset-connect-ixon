@@ -34,7 +34,7 @@ router.get("/", async (req, res) => {
         const iSession = req.cookies["ixon-session"];
         const validSession = await ixon.isValidSession(iSession);
     
-        if (validSession){
+        if (validSession) {
             res.redirect("/devices");
         } 
         else {
@@ -53,7 +53,7 @@ router.post("/signin/ixon", async (req, res) => {
     const twoFactorAuthentication = req.body.twoFactorAuthentication;
     const expiresIn = 3600; // in seconds
     let ixonPermissions;
-
+    
     try {
         await ixon.getLinkList();
         const ixonSession = await getAdapterSession(username, password, ixon, expiresIn, twoFactorAuthentication);
@@ -63,17 +63,19 @@ router.post("/signin/ixon", async (req, res) => {
     catch (e){
         console.log(e);
         res.status(401).redirect("/?signin=failed");
+        return;
     }
 
     // also get ewon devices if the user has access to all devices 
     try {
-        if (ixonPermissions.agents_access_all){
+        if ((ixonPermissions.includes("COMPANY_WIDE_ROLE")) || ixonPermissions.includes("COMPANY_WIDE_ROLE") && ixonPermissions.includes("MANAGE_AGENT")) {
             const ewonSession = await getAdapterSession(config.ewon.username, config.ewon.password, ewon, 60);
             res = setSessionCookies(res, ewonSession, ewon.getAdapterName(), expiresIn);
         }
         res.redirect("/devices");
     }
     catch (e){
+        console.log(e);
         const params = "?ewonsignin=failed,invalidCompany";
         res.status(502).redirect("/devices" + params);
     }
@@ -86,19 +88,20 @@ router.get("/signout", async (req, res) => {
     try {
         const ixonPromise = ixon.deleteSession(isession);
         const ewonPromise = ewon.deleteSession(esession);
-
-        Promise.all([ixonPromise, ewonPromise])
-            .then(() => {
-                res.status(200).redirect("/");
-            })
-            .catch((error) => {
-                res.status(502).redirect("/");
-            });
     }
     catch (e) {
         res.status(502).redirect("/");
         console.log(e);
+        return;
     }
+
+    Promise.all([ixonPromise, ewonPromise])
+       .then(() => {
+           res.status(200).redirect("/");
+       })
+       .catch((error) => {
+           res.status(502).redirect("/");
+       });
 });
 
 
@@ -153,6 +156,34 @@ router.get("/devices/ixon/user", async (req, res) => {
     }
 });
 
+
+
+router.get("/devices/ixon/logsErrors", async (req, res) => {
+    try {
+        // add ixon verification. i.e. access to sql iff access via ixon.
+        const ixonSession = req.cookies["ixon-session"];
+        const validSession = await ixon.isValidSession(ixonSession);
+    
+        if (!validSession){
+            res.status(401).send("Session unauthorized");
+            return;
+        }
+    
+        const credentials = config.mysql;
+        const pool = mysql.createPool(credentials);
+        const query = "SELECT * FROM recenterrors";
+       
+        pool.query(query, (error, results) => {
+            if (error) throw error;
+            res.status(200).send({"status": "success", "data": results});
+        });
+    }
+    catch (e) {
+        console.log(e);
+        res.status(502).send({"status": "failed", "data": []});
+    }
+});
+
 router.get("/devices/ixon/recentErrors", async (req, res) => {
     try {
         // add ixon verification. i.e. access to sql iff access via ixon.
@@ -161,6 +192,7 @@ router.get("/devices/ixon/recentErrors", async (req, res) => {
     
         if (!validSession){
             res.status(401).send("Session unauthorized");
+            return;
         }
     
         const credentials = config.mysql;
@@ -168,8 +200,8 @@ router.get("/devices/ixon/recentErrors", async (req, res) => {
         const query = "SELECT * FROM recenterrors";
        
         pool.query(query, (error, results) => {
-            res.status(200).send({"status": "success", "data": results});
             if (error) throw error;
+            res.status(200).send({"status": "success", "data": results});
         });
     }
     catch (e) {
@@ -196,11 +228,12 @@ router.get("/devices/ewon/alive", async (req, res) => {
         const ewonSession = req.cookies["ewon-session"];
         const validSession = await ewon.isValidSession(ewonSession);
 
-        if (!validSession) throw new Error;
+        if (!validSession) throw new Error("Keep alive request to Ewon failed.");
 
         res.status(200).json({"status": "success"});
     }
     catch (e){
+        console.error(e);
         res.status(401).json({"status": "failed"});
     }
 });
