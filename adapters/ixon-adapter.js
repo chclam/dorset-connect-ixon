@@ -7,11 +7,13 @@ const classes = require("./classes.js");
 const linkDict = {};
 let linkListChecksum;
 
+const ixonBaseUrl = "https://portal.ixon.cloud/portal/devices/";
+
 function getAdapterName(){
     return "ixon";
 }
 
-function formatRequestData(uri=config.ixon.uri, method="GET", sessionKey="", form={}, body=null){
+function formatRequestData(uri=config.ixon.uri, method="GET", sessionKey="", form={}, body={}){
     const requestData = {
         uri: uri,
         method: method,
@@ -84,7 +86,7 @@ async function getSession(username, password, expiresIn, twoFactorAuthentication
     try {
         let sessionData = await requestPromise(requestData);
         sessionData = JSON.parse(sessionData);
-        return sessionData.data.secretId;
+        return sessionData.data;
     }
     catch (e) {
         // log error in separate file.
@@ -93,24 +95,22 @@ async function getSession(username, password, expiresIn, twoFactorAuthentication
 }
 
 async function getUserData(sessionKey){
-    let devicesUri = linkDict["User"];
-    devicesUri = devicesUri.replace("{publicId}", "me");
-    devicesUri += "?fields=emailAddress,fullName,language,permissions.*";
+    let devicesUri = linkDict["MyUser"];
+    devicesUri += "?fields=emailAddress,name,language";
     const requestData = formatRequestData(devicesUri, "GET", sessionKey);
     
     try {
         let data = await requestPromise(requestData);
         data = JSON.parse(data);
-        delete data.data.links;   
         return JSON.stringify(data.data);
     }
     catch (e){
-        throw "User data retrieval failed.";
+        throw `User data retrieval failed. ${e}`;
     }
 }
 
 async function getDevices(sessionKey){
-    const params = "?fields=name,publicId,activeVpnSession,devices.*,servers.*,dataMonitors,dataReports";
+    const params = "?fields=name,publicId,activeVpnSession,devices.*,servers.*,dataMonitors,dataReports&page-size=500";
     const devicesUri = linkDict["AgentList"] + params;
     const requestData = formatRequestData(devicesUri, "GET", sessionKey);
     
@@ -120,16 +120,17 @@ async function getDevices(sessionKey){
         return jsonResponse.data;
     }
     catch (e){
-        throw "Device retrieval failed.";
+        throw `Device retrieval failed. ${e}`;
     }
 }
 
-async function deleteSession(sessionKey=""){
+async function deleteSession(sessionKey, publicId=""){
 
-    if (sessionKey.length === 0) return Promise.resolve("session key is undefined");
+    if (publicId.length === 0) return Promise.reject(new Error("publicId is undefined"));
 
-    const devicesUri = linkDict["AccessTokenList"] + "/me";
-    const requestData = formatRequestData(devicesUri, "DELETE", sessionKey);
+    const devicesUri = linkDict["AccessTokenList"];
+    
+    const requestData = formatRequestData(devicesUri, "DELETE", sessionKey, {publicId: publicId});
     
     try {
        await requestPromise(requestData);
@@ -155,7 +156,6 @@ async function isValidSession(sessionKey=""){
         return Promise.resolve(true);
     }
     catch (e) {
-        console.log(linkDict);
         return Promise.resolve(false);
     }
 }
@@ -182,26 +182,28 @@ async function appendHttpServers(sessionKey, devices) {
     // Stop if there are no http servers to retrieve, i.e. no device is online
     if (httpServers.length === 0) return;
 
-    const uri = linkDict["WebAccessList"];
-    const requestData = formatRequestData(uri, "POST", sessionKey, undefined, httpServers);
+    
+    const uri = linkDict["WebAccess"];
+    const requestData = formatRequestData(uri, "POST", sessionKey, httpServers);
 
     try {
         let sessionData = await requestPromise(requestData);
+        sessionData = JSON.parse(sessionData);
+        sessionData = sessionData["data"];
 
         // append the requested links to the devices in the parameter
         let httpLinkCounter = 0;
         for (let device of devices){
             for (deviceServer of device["servers"]){
                 if (deviceServer.type === "http"){
-                    deviceServer["link"] = sessionData["data"][httpLinkCounter]["url"];
+                    deviceServer["link"] = sessionData[httpLinkCounter]["url"];
                     httpLinkCounter++;
                 }
             }
         }
     }
     catch (e) {
-        console.error(e);
-        throw "Http servers request failed.";
+        throw `Http servers request failed. ${e}`;
     }
 }
 
@@ -223,7 +225,7 @@ function formatDevices(deviceData){
                         url = server.link;
                     }
                     else if (server.type === "vnc"){
-                        url = `https://portal.ixon.cloud/agents/${ixon.publicId}/Web-Access/VNC/${server.publicId}`;
+                        url = `${ixonBaseUrl}${ixon.publicId}/web-access/vnc/${server.publicId}`;
                     }
                     url = encodeURI(url);
                 }

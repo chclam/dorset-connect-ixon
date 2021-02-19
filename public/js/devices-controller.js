@@ -116,9 +116,11 @@ function init(){
     */
     const urlParams = new URLSearchParams(window.location.search).get("ewonsignin");
    
+    console.log("h1");
     if(urlParams !== null){
         const errorParams = urlParams.split(",");
 
+        console.log("h2");
         const errorMsgs = {
             "failed": "Aanmelding bij Ewon mislukt.",
             "invalidCompany": "U heeft geen toegangsrechten tot dit bedrijf."
@@ -136,10 +138,10 @@ function init(){
     fetcher.getIxonUserData()
       .then(data => {
         data = JSON.parse(data);
-        view.drawUserSession(data.fullName, data.emailAddress, data.permissions);
+        view.drawUserSession(data["name"], data["emailAddress"]);
       })
       .catch(e => {
-          throw "retrieval userdata failed.";
+          throw `retrieval userdata failed. ${e}`;
       });
 
     // make ajax-requests for ixon and ewon devices to middleware server

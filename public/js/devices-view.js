@@ -19,7 +19,6 @@ export function drawDevices(devices){
                 </div>
             </a>`
             );
-//
         $(".deviceList").append(deviceDiv);
     }
 }
@@ -45,12 +44,16 @@ function formatDeviceStatusBall(isOnline){
     return `<span class="material-icons md-16 ${isOnline ? 'text-success' : 'text-light'}">stop_circle</span>`;
  }
 
-export function drawUserSession(username, email, permissions){
-    const userType = (permissions.agents_access_all ? "Toegang tot Ewon en Ixon" : "Reguliere Gebruiker");
+export function drawUserSession(name, email){
+    const d = new Date();
+    const mins = String(d.getMinutes());
+    const dTxt = `Gegevens opgehaald op: ${d.getHours()}:${mins.length < 2 ? "0" + mins : mins}  ${d.getDate()}-${d.getMonth()+1}-${d.getFullYear()}`;
     
-    $(".user-session .name").text(username);
+    //const userType = (permissions.agents_access_all ? "Toegang tot Ewon en Ixon" : "Reguliere Gebruiker");
+    
+    $(".user-session .name").text(name);
     $(".user-session .email").text(email);
-    $(".user-session .userType").text(userType);
+    $(".user-session .signInTime").text(dTxt);
 }
 
 // = device view with links and dashboardlinks.
@@ -100,19 +103,6 @@ export function showDeviceModal(device){
     else {
         for (let deviceLink of device.links){
             $(".linkList").append(formatDeviceLink(deviceLink.name, deviceLink.url));
-        }
-    }
-    // data monitors (actual dashboards)
-    if (device.dataMonitors.length > 0 || device.dataReports.length > 0) {
-        // show dashboardHeader
-        $(".dashboardHeader").removeClass("d-none");
-        $(".dashboardHeader").addClass("d-flex");
-
-        for (let dataMonitor of device.dataMonitors){
-            $(".dashboardList").append(formatDeviceLink(dataMonitor.name, dataMonitor.url, true));
-        }
-        for (let dataReport of device.dataReports){
-            $(".dashboardList").append(formatDeviceLink(dataReport.name, dataReport.url, true));
         }
     }
     $("#deviceModal").modal("show");

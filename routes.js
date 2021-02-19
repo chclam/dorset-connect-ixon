@@ -20,8 +20,11 @@ async function getAdapterSession(username, password, adapter, expiresIn, twoFact
     }
 }
    
-function setSessionCookies(res, sessionKey, adapterName, expiresIn){
+function setSessionCookies(res, sessionKey, adapterName, expiresIn, publicId=""){
     res.cookie(`${adapterName}-session`, sessionKey, {maxAge: expiresIn * 10000}); // expiresin to milliseconds
+    if (publicId.length > 0){
+        res.cookie(`${adapterName}-publicId`, publicId, {maxAge: expiresIn * 10000}); // expiresin to milliseconds
+    }
     return res;
 }
 
@@ -56,8 +59,10 @@ router.post("/signin/ixon", async (req, res) => {
     
     try {
         await ixon.getLinkList();
-        const ixonSession = await getAdapterSession(username, password, ixon, expiresIn, twoFactorAuthentication);
-        res = setSessionCookies(res, ixonSession, ixon.getAdapterName(), expiresIn);
+        const ixonSessionData = await getAdapterSession(username, password, ixon, expiresIn, twoFactorAuthentication);
+        const ixonPublicId = ixonSessionData["publicId"];
+        const ixonSession = ixonSessionData["secretId"];
+        res = setSessionCookies(res, ixonSession, ixon.getAdapterName(), expiresIn, ixonPublicId);
         ixonPermissions = await ixon.getPermissions(ixonSession);
     }
     catch (e){
@@ -68,7 +73,7 @@ router.post("/signin/ixon", async (req, res) => {
 
     // also get ewon devices if the user has access to all devices 
     try {
-        if ((ixonPermissions.includes("COMPANY_WIDE_ROLE")) || ixonPermissions.includes("COMPANY_WIDE_ROLE") && ixonPermissions.includes("MANAGE_AGENT")) {
+        if (ixonPermissions.includes("COMPANY_WIDE_ROLE") || (ixonPermissions.includes("COMPANY_WIDE_ROLE") && ixonPermissions.includes("MANAGE_AGENT"))) {
             const ewonSession = await getAdapterSession(config.ewon.username, config.ewon.password, ewon, 60);
             res = setSessionCookies(res, ewonSession, ewon.getAdapterName(), expiresIn);
         }
@@ -83,25 +88,25 @@ router.post("/signin/ixon", async (req, res) => {
 
 router.get("/signout", async (req, res) => {
     const isession = req.cookies["ixon-session"];
+    const iPublicId = req.cookies["ixon-publicId"];
     const esession = req.cookies["ewon-session"];
 
     try {
-        const ixonPromise = ixon.deleteSession(isession);
+        const ixonPromise = ixon.deleteSession(isession, iPublicId);
         const ewonPromise = ewon.deleteSession(esession);
+
+        Promise.all([ixonPromise, ewonPromise])
+        .then(() => {
+            res.status(200).redirect("/");
+        })
+        .catch((error) => {
+            throw error;
+        });
     }
     catch (e) {
         res.status(502).redirect("/");
         console.log(e);
-        return;
     }
-
-    Promise.all([ixonPromise, ewonPromise])
-       .then(() => {
-           res.status(200).redirect("/");
-       })
-       .catch((error) => {
-           res.status(502).redirect("/");
-       });
 });
 
 
