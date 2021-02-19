@@ -96,12 +96,12 @@ router.get("/signout", async (req, res) => {
         const ewonPromise = ewon.deleteSession(esession);
 
         Promise.all([ixonPromise, ewonPromise])
-        .then(() => {
-            res.status(200).redirect("/");
-        })
-        .catch((error) => {
-            throw error;
-        });
+          .then(() => {
+              res.status(200).redirect("/");
+          })
+          .catch((error) => {
+              res.status(502).redirect("/");
+          });
     }
     catch (e) {
         res.status(502).redirect("/");

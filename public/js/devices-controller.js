@@ -4,7 +4,7 @@ import * as view from "./devices-view.js";
 
 let sortedDevices;
 
-const isTest = false; // for recent error dummy test data 
+const isTest = true; // for recent error dummy test data 
 
 $(document).ready(function() {
 
@@ -164,21 +164,21 @@ function init(){
             return Promise.resolve([]);
         });
 
-     const mySqlPromise = fetcher.getSqlErrors()
-        .then(devices => {
-            return Promise.resolve(devices);
-        })
-        .catch(e => {
-            errorHandler.numberErrorsRequest(e);
-            return Promise.resolve([]);
-        });
-
+//       const mySqlPromise = fetcher.getSqlErrors()
+//          .then(devices => {
+//              return Promise.resolve(devices);
+//          })
+//          .catch(e => {
+//              errorHandler.numberErrorsRequest(e);
+//              return Promise.resolve([]);
+//          });
+//
     // show on page as soon as either device type is loaded.
-     Promise.all([ixonPromise, ewonPromise, mySqlPromise])
-         .then(([ixonDevices, ewonDevices, mySqlErrors]) => {
+//      Promise.all([ixonPromise, ewonPromise, mySqlPromise])
+//          .then(([ixonDevices, ewonDevices, mySqlErrors]) => {
 
-    //Promise.all([ixonPromise, ewonPromise])
-    //    .then(([ixonDevices, ewonDevices]) => {
+    Promise.all([ixonPromise, ewonPromise])
+        .then(([ixonDevices, ewonDevices]) => {
 
             // if both are not loaded.
             if (ixonDevices.length === 0 && ewonDevices.length === 0){
@@ -188,7 +188,7 @@ function init(){
             // sort devices by online status and lexicographical order.
             sortedDevices = ixonDevices.concat(ewonDevices);
 
-            mergeErrorData(sortedDevices, mySqlErrors);
+            // mergeErrorData(sortedDevices, mySqlErrors);
 
             sortDevices(sortedDevices);
             view.drawDevices(sortedDevices);
